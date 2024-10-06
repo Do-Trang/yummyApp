@@ -13,7 +13,7 @@
 - Clone project from github link:
   <br/>
   ```
-  git clone https://github.com/lmhuong711/anchi
+  git clone https://github.com/Do-Trang/yummyApp
   ```
 - On bash/Linux command line: (just run when first build on device)
   <br/>
