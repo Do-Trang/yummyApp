@@ -18,14 +18,9 @@ module.exports = (sequelize, DataTypes) => {
   }
 
   UserToken.init({
-    id: {
-      type: DataTypes.INTEGER,
-      primaryKey: true,
-      autoIncrement: true,
-      allowNull: false,
-    },
     user_id: {
       type: DataTypes.INTEGER,
+      primaryKey: true,
       allowNull: false,
       references: {
         model: 'users',
@@ -33,10 +28,6 @@ module.exports = (sequelize, DataTypes) => {
       },
       onUpdate: 'CASCADE',
       onDelete: 'CASCADE',
-    },
-    device_name: {
-      type: DataTypes.STRING(255),
-      allowNull: true,
     },
     refresh_token: {
       type: DataTypes.STRING(255),
@@ -54,7 +45,7 @@ module.exports = (sequelize, DataTypes) => {
       type: DataTypes.DATE,
       allowNull: true,
     },
-    is_active: {
+    check_verified: {
       type: DataTypes.BOOLEAN,
       allowNull: false,
       defaultValue: false,

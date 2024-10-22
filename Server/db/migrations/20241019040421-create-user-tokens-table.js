@@ -4,14 +4,9 @@
 module.exports = {
   async up (queryInterface, Sequelize) {
     await queryInterface.createTable('user_tokens', {
-      id: {
-        type: Sequelize.INTEGER,
-        primaryKey: true,
-        autoIncrement: true,
-        allowNull: false,
-      },
       user_id: {
         type: Sequelize.INTEGER,
+        primaryKey: true,
         allowNull: false,
         references: {
           model: 'users',
@@ -19,10 +14,6 @@ module.exports = {
         },
         onUpdate: 'CASCADE',
         onDelete: 'CASCADE',
-      },
-      device_name: {
-        type: Sequelize.STRING(255),
-        allowNull: true,
       },
       refresh_token: {
         type: Sequelize.STRING(255),
@@ -40,7 +31,7 @@ module.exports = {
         type: Sequelize.DATE,
         allowNull: true,
       },
-      is_active: {
+      check_verified: {
         type: Sequelize.BOOLEAN,
         allowNull: false,
         defaultValue: false,
@@ -49,7 +40,6 @@ module.exports = {
   },
 
   async down (queryInterface, Sequelize) {
-    // Xóa bảng user_tokens
     await queryInterface.dropTable('user_tokens');
   }
 };

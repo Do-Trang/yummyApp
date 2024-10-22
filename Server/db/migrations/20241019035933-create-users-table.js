@@ -21,12 +21,12 @@ module.exports = {
       email: {
         type: Sequelize.STRING(255),
         unique: true,
-        allowNull: false,
+        allowNull: true,
       },
       phone_number: {
         type: Sequelize.STRING(20),
         unique: true,
-        allowNull: false,
+        allowNull: true,
       },
       dob: {
         type: Sequelize.DATE,
@@ -48,6 +48,11 @@ module.exports = {
         type: Sequelize.STRING(255),
         allowNull: true,
       },
+      is_active: {
+        type: Sequelize.BOOLEAN,
+        allowNull: false,
+        defaultValue: false,
+      }
     });
   },
 
