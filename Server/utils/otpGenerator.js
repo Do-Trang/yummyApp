@@ -2,10 +2,11 @@ const otpGenerator = require('otp-generator');
 
 function generateOtp() {
     return otpGenerator.generate(6, { 
-        upperCase: false, 
-        specialChars: false, 
-        digits: true 
+        digits: true,
+        lowerCaseAlphabets: false,
+        upperCaseAlphabets: false,
+        specialChars: false,
     });
 }
 
-module.exports = generateOtp;
+module.exports = { generateOtp };

@@ -3,4 +3,4 @@ const emailRegex = (email) => {
     return PATTERN.test(email);
 };
   
-module.exports = emailRegex;
+module.exports = { emailRegex };
