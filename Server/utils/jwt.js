@@ -1,7 +1,8 @@
 const jwt = require('jsonwebtoken');
 const { promisify } = require('util');
 
-const sign = promisify(jwt.sign);
+const sign = promisify(jwt.sign).bind(jwt);
+const verify = promisify(jwt.verify).bind(jwt)
 
 const generateAccessToken = async (payload) => {
     try {
@@ -38,4 +39,15 @@ const generateRefreshToken = async () => {
     }
 };
 
-module.exports = { generateAccessToken, generateRefreshToken };
+const verifyToken = async (token) => {
+    try {
+        const secretKey = process.env.ACCESS_TOKEN_SECRET_KEY;
+        const decoded = verify(token, secretKey);
+        return decoded;
+    } catch (error) {
+        console.error('Error verifying token:', error);
+        return null;
+    }
+}
+
+module.exports = { generateAccessToken, generateRefreshToken, verifyToken};
