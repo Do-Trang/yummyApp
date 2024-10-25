@@ -2,6 +2,7 @@ const { sendEmail } = require('./mailConfig.js');
 
 const sendVerificationEmail = async (to, otp) => {
   const subject = 'Xác thực tài khoản của bạn';
+  console.log(otp)
   const content = `
     <h1>Xác thực tài khoản</h1>
     <p>Xin chào,</p>
@@ -21,7 +22,5 @@ const sendVerificationEmail = async (to, otp) => {
     throw error;
   }
 };
-
-sendVerificationEmail('22026515@vnu.edu.vn', '123456');
 
 module.exports = { sendVerificationEmail };
