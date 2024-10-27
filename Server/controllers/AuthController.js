@@ -1,13 +1,12 @@
-const bcrypt = require('bcryptjs');
 const dotenv = require('dotenv');
-const { User, UserToken } = require('../db/models');
-const { Op } = require('sequelize');
 
-const { generateOtp } = require('../utils/otpGenerator');
-const { generateAccessToken, generateRefreshToken } = require('../utils/jwt');
-
-const { sendVerificationEmail } = require('../utils/mail/sendVerifyEmail');
-const { sendRecoveryEmail } = require('../utils/mail/sendRecoveryEmail');
+const { signupWithEmail, 
+        signupWithPhoneNumber, 
+        login,
+        refreshAccessToken,
+        forgotPassword,
+        logout,
+        resetUserPassword } = require('../services/auth.js');
 
 dotenv.config();
 
@@ -19,35 +18,13 @@ class AuthController {
         const { username, account, password } = req.body;
     
         try {
-            const existingUser = await User.findOne({ 
-                where: { 
-                    phone_number: account
-                } 
-            });
-    
-            if (existingUser) {
-                return res.status(400).json({ success: false, message: 'The phone number is already in use.' });
+            const result = await signupWithPhoneNumber(username, account, password);
+
+            if (!result.success) {
+                return res.status(400).json(result);
             }
-    
-            const saltRounds = 10;
-            const hashedPassword = await bcrypt.hash(password, saltRounds);
 
-            const newUser = await User.create({
-                username: username,
-                password: hashedPassword,
-                phone_number: account
-            });
-    
-            await UserToken.create({
-                user_id: newUser.user_id,
-            });
-    
-            return res.status(201).json({
-                success: true,
-                message: 'Sign up successful! Please check your sms to verify your account.', 
-                account: account,
-            });
-
+            return res.status(201).json(result);
         } catch (error) {
             console.log('Error during signup with phone:', error);
             return res.status(500).json({ 
@@ -64,48 +41,18 @@ class AuthController {
         const { username, account, password } = req.body;
 
         try {
-            const existingUser = await User.findOne({ 
-                attributes: ['user_id'],
-                where: { 
-                    email: account 
-                } 
-            });
+            const result = await signupWithEmail(username, account, password);
 
-            if (existingUser) {
-                return res.status(400).json({ success: false, message: 'The email is already in use.' });
+            if (!result.success) {
+                return res.status(400).json(result);
             }
 
-            const saltRounds = 10;
-            const hashedPassword = await bcrypt.hash(password, saltRounds);
-
-            const newUser = await User.create({
-                username: username,
-                password: hashedPassword,
-                email: account
-            });
-
-            const otp = generateOtp();
-            const otpExpirationTime = new Date(Date.now() + 5 * 60 * 1000);
-
-            await UserToken.create({
-                user_id: newUser.user_id,
-                otp: otp,
-                otp_expiration: otpExpirationTime
-            });
-
-            await sendVerificationEmail(account, otp);
-
-            return res.status(201).json({
-                success: true,
-                message: 'Sign up successful! Please check your email to verify your account.', 
-                account: account,
-            });
-
+            return res.status(201).json(result);
         } catch (error) {
-            console.error('Error during signup with email:', error);
-            return res.status(500).json({ 
+            console.error('Error during registration:', error);
+            return res.status(500).json({
                 success: false,
-                message: 'An error occurred during the signup process.' 
+                message: 'An error occurred during registration.',
             });
         }
     }
@@ -115,117 +62,21 @@ class AuthController {
     // @access Public
     async login(req, res) {
         const { account, password } = req.body;
+        const isEmail = req.isEmail;
 
         try {
-            const user = await User.findOne({
-                where: {
-                    [Op.or]: [
-                        { phone_number: account },
-                        { email: account }
-                    ]
-                },
-                attributes: ['user_id', 'password'],
-            });
-
-            if (!user) {
-                return res.status(401).json({ success: false, message: 'Invalid credentials.' });
-            }
-
-            const isPasswordValid = await bcrypt.compare(password, user.password);
-            if (!isPasswordValid) {
-                return res.status(401).json({ success: false, message: 'Invalid credentials.' });
-            }
-
-            const payload = { 
-                userId: user.user_id 
-            };
-            const accessToken = await generateAccessToken(payload);
-            const refreshToken = await generateRefreshToken();
-
-            const userToken = await UserToken.findOne({
-                attributes: ['refresh_token', 'check_verified'],
-                where: {
-                    user_id: user.user_id,
-                },
-            });
-
-            if (!userToken || !userToken.refresh_token) {
-                if (!userToken.check_verified) {
-                    if (req.isEmail) {
-                        const otp = generateOtp();
-                        const otpExpirationTime = new Date(Date.now() + 5 * 60 * 1000);
-
-                        await sendVerificationEmail(account, otp);
-                        
-                        await UserToken.update(
-                            {
-                                otp: otp,
-                                otp_expiration: otpExpirationTime
-                            }, 
-                            {
-                                where: {
-                                    user_id: user.user_id
-                                }
-                            }
-                        );
-
-                        return res.status(202).json({
-                            account: account,
-                            success: true,
-                            message: 'OTP has been sent to your mail. Please verify to continue.',
-                        });
-
-                    } else {
-                        return res.status(202).json({
-                            success: true,
-                            message: 'OTP has been sent to your sms. Please verify to continue.',
-                        });   
-                    }
-                } else {
-                    const refreshTokenExpiration = new Date(Date.now() + parseInt(process.env.REFRESH_TOKEN_LIFE));
-
-                    await UserToken.update(
-                        {
-                            refresh_token: refreshToken,
-                            token_expiration: refreshTokenExpiration
-                        }, 
-                        {
-                            where: {
-                                user_id: user.user_id
-                            }
-                        }
-                    );
-    
-
-                    return res.status(200).json({
-                        success: true,
-                        message: 'Login successful.',
-                        accessToken,
-                        refreshToken
-                    });
-                }
+            const result = await login(account, password, isEmail);
+            
+            let statusCode;
+            if (!result.success) {
+                statusCode = 401;
+            } else if (result.message.includes('OTP')) {
+                statusCode = 202;
             } else {
-                const refreshTokenExpiration = new Date(Date.now() + parseInt(process.env.REFRESH_TOKEN_LIFE));
-                await UserToken.update(
-                    {
-                        refresh_token: refreshToken,
-                        token_expiration: refreshTokenExpiration
-                    }, 
-                    {
-                        where: {
-                            user_id: user.user_id
-                        }
-                    }
-                );
-
-                return res.status(200).json({
-                    success: true,
-                    message: 'Login successful.',
-                    accessToken,
-                    refreshToken
-                });
+                statusCode = 200;
             }
 
+            return res.status(statusCode).json(result);
         } catch (error) {
             console.error('Error during login:', error);
             return res.status(500).json({ 
@@ -241,47 +92,19 @@ class AuthController {
     async refreshAccessToken(req, res) {
         const { refreshToken } = req.body;
 
-        if (!refreshToken) {
-            return res.status(400).json({
-                success: false,
-                message: 'Refresh token is required.',
-            });
-        }
-
         try {
-            const userToken = await UserToken.findOne({
-                where: { 
-                    refresh_token: refreshToken 
-                },
-                attributes: ['user_id']
-            });
-
-            if (!userToken) {
-                return res.status(401).json({
-                    success: false,
-                    message: 'Invalid refresh token.',
-                });
-            }
-
-            const payload = { userId: userToken.user_id };
-            const newAccessToken = await generateAccessToken(payload);
-            const newRefreshToken = await generateRefreshToken();
-
-            await UserToken.update(
-                { 
-                    refresh_token: newRefreshToken 
-                },
-                { 
-                    where: { user_id: userToken.user_id } 
-                }
-            );
-
-            return res.status(200).json({
-                success: true,
-                message: 'Access token refreshed successfully.',
-                accessToken: newAccessToken,
-                refreshToken: newRefreshToken,
-            });
+            const result = await refreshAccessToken(refreshToken);
+            
+            if (result.success) {
+                return res.status(200).json(result);
+            } 
+            
+            if (result.message === 'Invalid refresh token.') {
+                return res.status(401).json(result);
+            } 
+            
+            return res.status(400).json(result);
+            
         } catch (error) {
             console.error('Error refreshing access token:', error);
             return res.status(500).json({
@@ -296,43 +119,15 @@ class AuthController {
     // @access Public
     async forgotPassword(req, res) {
         const { account } = req.body;
+        const isEmail = req.isEmail;
     
         try {
-            const user = await User.findOne({
-                where: {
-                    [Op.or]: [
-                        { email: account },
-                        { phone_number: account }
-                    ]
-                }
-            });
+            const otpResult = await forgotPassword(account, isEmail);
     
-            if (!user) {
-                return res.status(404).json({
-                    success: false,
-                    message: 'User not found.',
-                });
-            }
-    
-            if (req.isEmail) {
-                const otp = generateOtp();
-                const otpExpirationTime = new Date(Date.now() + 5 * 60 * 1000);
-        
-                await UserToken.update(
-                    { otp, otp_expiration: otpExpirationTime },
-                    { where: { user_id: user.user_id } }
-                );
-
-                await sendRecoveryEmail(account, otp);
-                return res.status(200).json({
-                    success: true,
-                    message: 'OTP sent to your email. Please check your inbox.',
-                });
+            if (otpResult.success) {
+                return res.status(200).json(otpResult);
             } else {
-                return res.status(200).json({
-                    success: true,
-                    message: 'OTP sent to your sms. Please check your messages.',
-                });
+                return res.status(400).json(otpResult);
             }
         } catch (error) {
             console.error('Error during forgot password:', error);
@@ -348,37 +143,15 @@ class AuthController {
     // @access Private
     async logout(req, res) {
         const user_id = req.user_id;
-
-        try {
-            const userToken = await UserToken.findOne({
-                where: { user_id: user_id }
-            });
     
-            if (!userToken) {
-                return res.status(404).json({
-                    success: false,
-                    message: 'User session not found.',
-                });
+        try {
+            const logoutResult = await logout(user_id);
+    
+            if (!logoutResult.success) {
+                return res.status(404).json(logoutResult);
             }
-
-            await UserToken.update(
-                {
-                    refresh_token: null,
-                    token_expiration: null
-                },
-                {
-                    where: {
-                        user_id: user_id
-                    }
-                }
-            );
-            
-
-            return res.status(200).json({
-                success: true,
-                message: 'Logout successful.',
-            });
-
+    
+            return res.status(200).json(logoutResult);
         } catch (error) {
             console.error('Error during logout:', error);
             return res.status(500).json({
@@ -396,36 +169,13 @@ class AuthController {
         const userId = req.user_id;
 
         try {
-            const user = await User.findOne({ 
-                where: { 
-                    user_id: userId 
-                } 
-            });
+            const resetResult = await resetUserPassword(userId, newPassword);
 
-            if (!user) {
-                return res.status(404).json({
-                    success: false,
-                    message: 'User not found.',
-                });
+            if (resetResult.success) {
+                return res.status(200).json(resetResult);
+            } else {
+                return res.status(404).json(resetResult);
             }
-
-            const saltRounds = 10;
-            const hashedPassword = await bcrypt.hash(newPassword, saltRounds);
-
-            await User.update(
-                { 
-                    password: hashedPassword 
-                },
-                { 
-                    where: { user_id: userId } 
-                }
-            );
-
-            return res.status(200).json({
-                success: true,
-                message: 'Password has been reset successfully.',
-            });
-
         } catch (error) {
             console.error('Error during password reset:', error);
             return res.status(500).json({
