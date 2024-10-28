@@ -15,6 +15,11 @@
   ```
   git clone https://github.com/Do-Trang/yummyApp
   ```
+- Modify path in yummyApp/Mobile/android/gradle.properties
+  <br/>
+  ```
+  org.gradle.java.home=
+  ```
 - On bash/Linux command line: (just run when first build on device)
   <br/>
   ```
