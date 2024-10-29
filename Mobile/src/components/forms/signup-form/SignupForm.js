@@ -1,110 +1,156 @@
-import React, { useState } from 'react';
+import React, { useState } from "react";
 import {
-    View,
-    Text,
-    TextInput,
-    Button,
-    SafeAreaView,
-    TouchableOpacity,
-} from 'react-native';
-import Icon from 'react-native-vector-icons/Ionicons';
-import SegmentedControl from '@react-native-community/segmented-control';
+  View,
+  Text,
+  TextInput,
+  SafeAreaView,
+  TouchableOpacity,
+  Pressable,
+  Image,
+} from "react-native";
+import colors from "../../../constants/colors";
+import Svg, { Path } from "react-native-svg";
+import Icon from "react-native-vector-icons/Ionicons";
+import SegmentedControl from "@react-native-community/segmented-control";
+import SignupFormStyles from "./SignupFormStyles";
 
 const SignupForm = () => {
-    const [username, setUsername] = useState("");
-    const [account, setAccount] = useState("");
-    const [password, setPassword] = useState("");
-    const [confirmPassword, setConfirmPassword] = useState("");
-    const [isPasswordShown, setIsPasswordShown] = useState(false);
-    const [isConfirmPasswordShown, setIsConfirmPasswordShown] = useState(false);
-    const [statusUsername, setStatusUsername] = useState("");
-    const [statusAccount, setStatusAccount] = useState("");
-    const [statusPassword, setStatusPassword] = useState("");
-    const [statusConfirmPassword, setStatusConfirmPassword] = useState("");
-    const [selectedIndex, setSelectedIndex] = useState(0);
+  const [username, setUsername] = useState("");
+  const [account, setAccount] = useState("");
+  const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [isPasswordShown, setIsPasswordShown] = useState(false);
+  const [isConfirmPasswordShown, setIsConfirmPasswordShown] = useState(false);
+  const [selectedIndex, setSelectedIndex] = useState(0);
 
-    const getAccountIcon = () => {
-        return selectedIndex === 0 ? "mail-outline" : "call-outline";
-    };
+  const getAccountIcon = () =>
+    selectedIndex === 0 ? "mail-outline" : "call-outline";
 
-    return (
-        <SafeAreaView>
-            <View>
-                <View>
-                    <Text>Welcome to AnChi 👋</Text>
-                </View>
-                <SegmentedControl
-                    values={['Đăng ký bằng Email', 'Đăng ký bằng Phone']}
-                    selectedIndex={selectedIndex}
-                    onChange={(event) => setSelectedIndex(event.nativeEvent.selectedSegmentIndex)}
-                />
-                <Text>Sign Up</Text>
-                <View>
-                    <Text>Username</Text>
-                    <View>
-                        <Icon name="person-outline" size={24} />
-                        <TextInput 
-                            placeholder="Enter your username" 
-                            value={username} 
-                            onChangeText={setUsername} 
-                        />
-                        <Text>{statusUsername}</Text>
-                    </View>
-                </View>
-                <View>
-                    <Text>Account</Text>
-                    <View>
-                        <Icon name={getAccountIcon()} size={24} />
-                        <TextInput 
-                            placeholder={selectedIndex === 0 ? "Enter your email" : "Enter your phone number"} 
-                            value={account} 
-                            onChangeText={setAccount} 
-                        />
-                        <Text>{statusAccount}</Text>
-                    </View>
-                </View>
-                <View>
-                    <Text>Password</Text>
-                    <View>
-                        <Icon name="lock-closed-outline" size={24} />
-                        <TextInput 
-                            placeholder="Enter your password" 
-                            secureTextEntry={!isPasswordShown} 
-                            value={password} 
-                            onChangeText={setPassword} 
-                        />
-                        <TouchableOpacity onPress={() => setIsPasswordShown(!isPasswordShown)}>
-                            <Icon name={isPasswordShown ? "eye-off" : "eye"} size={24} />
-                        </TouchableOpacity>
-                        <Text>{statusPassword}</Text>
-                    </View>
-                </View>
-                <View>
-                    <Text>Confirm Password</Text>
-                    <View>
-                        <Icon name="lock-closed-outline" size={24} />
-                        <TextInput 
-                            placeholder="Confirm your password" 
-                            secureTextEntry={!isConfirmPasswordShown} 
-                            value={confirmPassword} 
-                            onChangeText={setConfirmPassword} 
-                        />
-                        <TouchableOpacity onPress={() => setIsConfirmPasswordShown(!isConfirmPasswordShown)}>
-                            <Icon name={isConfirmPasswordShown ? "eye-off" : "eye"} size={24} />
-                        </TouchableOpacity>
-                        <Text>{statusConfirmPassword}</Text>
-                    </View>
-                </View>
-                <Button title="Submit" />
-                <View>
-                    <Text>Already have an account?</Text>
-                    <TouchableOpacity>
-                        <Text>Login</Text>
-                    </TouchableOpacity>
-                </View>
-            </View>
-        </SafeAreaView>
-    );
+  return (
+    <SafeAreaView style={SignupFormStyles.container}>
+      <View style={SignupFormStyles.header}>
+        <Svg
+          height="245"
+          width="400"
+          viewBox="0 0 400 245"
+          style={SignupFormStyles.svg}
+        >
+          <Path
+            fill={colors.primary}
+            d="M1 202.5V1H398.5V202.5C240.541 258.664 153.577 257.492 1 202.5Z"
+          />
+        </Svg>
+        <View style={SignupFormStyles.centerContent}>
+          <Image
+            style={SignupFormStyles.logo}
+            source={require("../../../../assets/logo1.png")}
+          />
+          <Text style={SignupFormStyles.text}>AnChi</Text>
+        </View>
+      </View>
+
+      <View style={SignupFormStyles.formContainer}>
+        <SegmentedControl
+          values={["Đăng ký bằng Email", "Đăng ký bằng Phone"]}
+          selectedIndex={selectedIndex}
+          onChange={(event) =>
+            setSelectedIndex(event.nativeEvent.selectedSegmentIndex)
+          }
+        />
+
+        <View style={SignupFormStyles.inputGroup}>
+          <Icon name="person-outline" size={24} style={SignupFormStyles.icon} />
+          <TextInput
+            style={SignupFormStyles.textInput}
+            placeholder="Enter your username"
+            value={username}
+            onChangeText={setUsername}
+          />
+        </View>
+
+        <View style={SignupFormStyles.inputGroup}>
+          <Icon
+            name={getAccountIcon()}
+            size={24}
+            style={SignupFormStyles.icon}
+          />
+          <TextInput
+            style={SignupFormStyles.textInput}
+            placeholder={
+              selectedIndex === 0
+                ? "Enter your email"
+                : "Enter your phone number"
+            }
+            value={account}
+            onChangeText={setAccount}
+          />
+        </View>
+
+        <View style={SignupFormStyles.inputGroup}>
+          <Icon
+            name="lock-closed-outline"
+            size={24}
+            style={SignupFormStyles.icon}
+          />
+          <TextInput
+            style={SignupFormStyles.textInput}
+            placeholder="Enter your password"
+            secureTextEntry={!isPasswordShown}
+            value={password}
+            onChangeText={setPassword}
+          />
+          <TouchableOpacity
+            onPress={() => setIsPasswordShown(!isPasswordShown)}
+            style={SignupFormStyles.toggleIconContainer}
+          >
+            <Icon
+              name={isPasswordShown ? "eye-off" : "eye"}
+              size={24}
+              style={SignupFormStyles.toggleIcon}
+            />
+          </TouchableOpacity>
+        </View>
+
+        <View style={SignupFormStyles.inputGroup}>
+          <Icon
+            name="lock-closed-outline"
+            size={24}
+            style={SignupFormStyles.icon}
+          />
+          <TextInput
+            style={SignupFormStyles.textInput}
+            placeholder="Confirm your password"
+            secureTextEntry={!isConfirmPasswordShown}
+            value={confirmPassword}
+            onChangeText={setConfirmPassword}
+          />
+          <TouchableOpacity
+            onPress={() => setIsConfirmPasswordShown(!isConfirmPasswordShown)}
+            style={SignupFormStyles.toggleIconContainer}
+          >
+            <Icon
+              name={isConfirmPasswordShown ? "eye-off" : "eye"}
+              size={24}
+              style={SignupFormStyles.toggleIcon}
+            />
+          </TouchableOpacity>
+        </View>
+
+        <View style={SignupFormStyles.buttonContainer}>
+          <TouchableOpacity style={SignupFormStyles.submitButton}>
+            <Text style={SignupFormStyles.buttonText}>Submit</Text>
+          </TouchableOpacity>
+        </View>
+
+        <View style={SignupFormStyles.loginRedirect}>
+          <Text>Already have an account? </Text>
+          <Pressable>
+            <Text style={SignupFormStyles.loginText}>Login</Text>
+          </Pressable>
+        </View>
+      </View>
+    </SafeAreaView>
+  );
 };
 
 export default SignupForm;
