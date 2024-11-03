@@ -82,12 +82,12 @@ const login = async (account, password, isEmail) => {
     });
 
     if (!user) {
-        return { success: false, message: 'Invalid credentials.' };
+        return { success: false, message: 'Non-exist user.' };
     }
 
     const isPasswordValid = await bcrypt.compare(password, user.password);
     if (!isPasswordValid) {
-        return { success: false, message: 'Invalid credentials.' };
+        return { success: false, message: 'False password' };
     }
 
     const payload = { userId: user.user_id };
@@ -248,11 +248,15 @@ const logout = async (userId) => {
     };
 };
 
-const resetUserPassword = async (userId, newPassword) => {
-    const user = await User.findOne({ 
-        where: { 
-            user_id: userId 
-        } 
+const resetUserPassword = async (account, newPassword) => {
+    const user = await User.findOne({
+        where: {
+            [Op.or]: [
+                { phone_number: account },
+                { email: account }
+            ]
+        },
+        attributes: ['user_id', 'password'],
     });
 
     if (!user) {
@@ -263,10 +267,15 @@ const resetUserPassword = async (userId, newPassword) => {
 
     await User.update(
         { 
-            password: hashedPassword 
+            password: hashedPassword
         },
         { 
-            where: { user_id: userId } 
+            where: {
+                [Op.or]: [
+                    { phone_number: account },
+                    { email: account }
+                ]
+            }, 
         }
     );
 

@@ -165,11 +165,10 @@ class AuthController {
     // @desc Reset user password
     // @access Private
     async resetPassword(req, res) {
-        const { newPassword } = req.body;
-        const userId = req.user_id;
+        const { account, newPassword } = req.body;
 
         try {
-            const resetResult = await resetUserPassword(userId, newPassword);
+            const resetResult = await resetUserPassword(account, newPassword);
 
             if (resetResult.success) {
                 return res.status(200).json(resetResult);
