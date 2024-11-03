@@ -4,7 +4,7 @@ import colors from '../../../constants/colors';
 const SignupFormStyles = StyleSheet.create({
     container: {
       flex: 1,
-      backgroundColor: colors.background,
+      backgroundColor: colors.white,
     },
     header: {
       position: 'relative',
@@ -17,14 +17,14 @@ const SignupFormStyles = StyleSheet.create({
     centerContent: {
       alignItems: 'center',
       justifyContent: 'center',
-      marginTop: 60,
+      marginTop: 30,
     },
     logo: {
-      width: 100,
-      height: 100,
+      width: 80,
+      height: 80,
     },
     text: {
-      fontSize: 36,
+      fontSize: 30,
       color: colors.white,
       marginTop: 10,
     },
@@ -36,24 +36,24 @@ const SignupFormStyles = StyleSheet.create({
       flexDirection: 'row',
       alignItems: 'center',
       borderBottomWidth: 1,
-      borderColor: colors.border,
-      marginBottom: 15,
+      marginBottom: 5,
       paddingVertical: 5,
     },
     icon: {
       marginRight: 10,
-      color: colors.icon,
+      color: colors.gray,
     },
     textInput: {
       flex: 1,
       height: 40,
       fontSize: 16,
+      
     },
     toggleIconContainer: {
       marginLeft: 10,
     },
     toggleIcon: {
-      color: colors.icon,
+      color: colors.black,
     },
     buttonContainer: {
         alignItems: 'center', 

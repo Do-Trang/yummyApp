@@ -8,10 +8,11 @@ const VerifyFormStyles = StyleSheet.create({
         alignItems: 'center', 
         padding: 16,
         backgroundColor: colors.white,
+        
     },
     image: {
-        width: 250,
-        height: 250,
+        width: 200,
+        height: 200,
         marginVertical: 16, 
     },
     notificationText: {
