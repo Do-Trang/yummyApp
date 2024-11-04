@@ -26,6 +26,7 @@
     "react-native": "0.68.0",
     "react-native-animatable": "^1.3.3",
     "react-native-check-box": "^2.1.7",
+    "react-native-dotenv": "^3.4.11",
     "react-native-fs": "^2.20.0",
     "react-native-gesture-handler": "^2.4.0",
     "react-native-gradient-icon": "^0.1.2",

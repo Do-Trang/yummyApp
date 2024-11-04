@@ -2,6 +2,7 @@ import React, {useState, useEffect, useRef} from 'react';
 import { View, Text, TextInput, TouchableOpacity, Image, StyleSheet, KeyboardAvoidingView, Platform, ScrollView } from 'react-native';
 import RecoveryFormStyles from './RecoveryFormStyles'; 
 import Snackbar from "react-native-snackbar";
+import {IP, PORT} from '@env'
 
 const RecoveryForm = (props) => {
     const [timeRemaining, setTimeRemaining] = useState(300);
@@ -26,7 +27,7 @@ const RecoveryForm = (props) => {
             if (isSubmitted) {
                 const otpValue = otp.join('');
                 try {
-                    const response = await fetch('http://192.168.1.4:3000/verify/verify-account', {
+                    const response = await fetch(`http://${IP}:${PORT}/verify/verify-account`, {
                         method: 'POST',
                         headers: {
                             'Content-Type': 'application/json',
@@ -128,7 +129,7 @@ const RecoveryForm = (props) => {
         const resendOTP = async () => {
             if (isResending) {
                 try {
-                    const response = await fetch('http://192.168.1.4:3000/verify/resend-otp-recovery', {
+                    const response = await fetch(`http://${IP}:${PORT}/verify/resend-otp-recovery`, {
                         method: 'POST',
                         headers: {
                             'Content-Type': 'application/json',

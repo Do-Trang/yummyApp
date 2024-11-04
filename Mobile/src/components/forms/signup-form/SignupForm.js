@@ -6,6 +6,7 @@ import Svg, { Path } from "react-native-svg";
 import Icon from "react-native-vector-icons/Ionicons";
 import SegmentedControl from "@react-native-community/segmented-control";
 import SignupFormStyles from "./SignupFormStyles";
+import {IP, PORT} from '@env'
 
 const validateEmail = (email) => {
     const PATTERN = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
@@ -103,7 +104,7 @@ const SignupForm = (props) => {
                 try {
                     const endpoint = selectedIndex === 0 ? 'signup/email' : 'signup/phone';
     
-                    const response = await fetch(`http://192.168.1.4:3000/auth/${endpoint}`, {
+                    const response = await fetch(`http://${IP}:${PORT}/auth/${endpoint}`, {
                         method: 'POST',
                         headers: {
                             "Content-Type": "application/json",

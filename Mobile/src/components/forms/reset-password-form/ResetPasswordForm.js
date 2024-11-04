@@ -5,6 +5,7 @@ import Svg, { Path } from "react-native-svg";
 import Snackbar from "react-native-snackbar";
 import ResetPasswordStyles from "./ResetPasswordFormStyles";
 import Icon from "react-native-vector-icons/Ionicons";
+import {IP, PORT} from '@env'
 
 const isValidPassword = (password) => {
     const PATTERN = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&.]{8,}$/;
@@ -49,7 +50,7 @@ const ResetPasswordForm = (props) => {
         const resetPassword = async () => {
             if (isSubmitted) {
                 try {
-                    const response = await fetch("http://192.168.1.4:3000/auth/reset-password", {
+                    const response = await fetch(`http://${IP}:${PORT}/auth/reset-password`, {
                         method: 'PATCH',
                         headers: {
                             "Content-Type": "application/json",

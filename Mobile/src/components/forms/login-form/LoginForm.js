@@ -8,6 +8,7 @@ import Icon from "react-native-vector-icons/Ionicons";
 import CheckBox from "@react-native-community/checkbox";
 import LoginFormStyles from "./LoginFormStyles";
 import Snackbar from "react-native-snackbar";
+import {IP, PORT} from '@env'
 
 const validateEmail = (email) => {
     const PATTERN = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
@@ -76,7 +77,7 @@ const LoginForm = (props) => {
         const login = async () => {
             if (!isSubmitting) return;
             try {
-                const response = await fetch("http://192.168.1.4:3000/auth/login", {
+                const response = await fetch(`http://${IP}:${PORT}/auth/login`, {
                     method: 'POST',
                     headers: {
                         "Content-Type": "application/json",
@@ -114,8 +115,12 @@ const LoginForm = (props) => {
                         props.navigation.navigate("VerifyScreen", { account: account });
                     }
                 } else {
-                    console.error("Login failed:", data.message);
-                    setStatusPassword(data.message || "Login failed. Please try again.");
+                    if(data.message == "Non-exist user.") {
+                        setStatusAccount(data.message || "Login failed. Please try again.");
+                    }
+                    else {
+                        setStatusPassword(data.message || "Login failed. Please try again.");
+                    }
                 }
             } catch (error) {
                 console.log("Error during login:", error);
@@ -141,7 +146,7 @@ const LoginForm = (props) => {
         }
         
         try {
-            const response = await fetch("http://192.168.1.4:3000/auth/forgot-password", {
+            const response = await fetch(`http://${IP}:${PORT}/auth/forgot-password`, {
                 method: 'POST',
                 headers: {
                     "Content-Type": "application/json",

@@ -3,6 +3,7 @@ import { View, Text, TextInput, TouchableOpacity, Image, StyleSheet, KeyboardAvo
 import VerifyFormStyles from './VerifyFormStyles';
 import Snackbar from "react-native-snackbar";
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import {IP, PORT} from '@env'
 
 const VerificationForm = (props) => {
     const [timeRemaining, setTimeRemaining] = useState(300);
@@ -27,7 +28,7 @@ const VerificationForm = (props) => {
             const otpValue = otp.join('');
             const verifyOtp = async () => {
                 try {
-                    const response = await fetch('http://192.168.1.4:3000/verify/verify-account', {
+                    const response = await fetch(`http://${IP}:${PORT}/verify/verify-account`, {
                         method: 'POST',
                         headers: {
                             'Content-Type': 'application/json',
@@ -130,7 +131,7 @@ const VerificationForm = (props) => {
         if (isResending) {
             const resendOtp = async () => {
                 try {
-                    const response = await fetch('http://192.168.1.4:3000/verify/resend-otp-verification', {
+                    const response = await fetch(`http://${IP}:${PORT}/verify/resend-otp-verification`, {
                         method: 'POST',
                         headers: {
                             'Content-Type': 'application/json',
