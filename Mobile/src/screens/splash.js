@@ -12,7 +12,7 @@ function Splash({ navigation }) {
 
     return (
         <View style={styles.body}>
-            <Image style={styles.logo} source={require('../../assets/logo1.png')}/>
+            <Image style={styles.logo} source={require('../../assets/app.png')}/>
             <Text style={[GlobalStyle.CustomFont, styles.text]}> AnChi </Text>
         </View>
     );

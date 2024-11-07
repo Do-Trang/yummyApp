@@ -153,7 +153,7 @@ const SignupForm = (props) => {
                     <Path fill={colors.primary} d="M1 150V1H400V150C250 180 150 180 1 150Z" />
                 </Svg>
                 <View style={SignupFormStyles.centerContent}>
-                    <Image style={SignupFormStyles.logo} source={require("../../../../assets/logo1.png")} />
+                    <Image style={SignupFormStyles.logo} source={require("../../../../assets/app.png")} />
                     <Text style={SignupFormStyles.text}>AnChi</Text>
                 </View>
             </View>

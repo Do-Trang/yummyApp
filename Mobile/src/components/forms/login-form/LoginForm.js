@@ -10,6 +10,8 @@ import LoginFormStyles from "./LoginFormStyles";
 import Snackbar from "react-native-snackbar";
 import {IP, PORT} from '@env'
 
+console.log(IP, PORT, "Haizz")
+
 const validateEmail = (email) => {
     const PATTERN = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
     return PATTERN.test(email);
@@ -77,6 +79,7 @@ const LoginForm = (props) => {
         const login = async () => {
             if (!isSubmitting) return;
             try {
+                console.log(IP, PORT)
                 const response = await fetch(`http://${IP}:${PORT}/auth/login`, {
                     method: 'POST',
                     headers: {
@@ -189,7 +192,7 @@ const LoginForm = (props) => {
                     <Path fill={colors.primary} d="M1 1V150C155 180 242 180 399 150V1H1Z" />
                 </Svg>
                 <View style={LoginFormStyles.centerContent}>
-                    <Image style={LoginFormStyles.logo} source={require("../../../../assets/logo1.png")} />
+                    <Image style={LoginFormStyles.logo} source={require("../../../../assets/app.png")} />
                     <Text style={[LoginFormStyles.text]}>AnChi</Text>
                 </View>
             </View>

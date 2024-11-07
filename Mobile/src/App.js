@@ -119,7 +119,6 @@ export function AnimTab1() {
     );
 }
 
-
 // App
 const RootStack = createStackNavigator();
 const app = (props) => {
@@ -150,7 +149,6 @@ const mapStateToProps = state => ({
     config: state.config,
 });
 export const App = connect(mapStateToProps, {})(app);
-
 
 // Main
 function Main() {

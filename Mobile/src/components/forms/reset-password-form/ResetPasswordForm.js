@@ -92,7 +92,7 @@ const ResetPasswordForm = (props) => {
                     <Path fill={colors.primary} d="M1 150V1H400V150C250 180 150 180 1 150Z" />
                 </Svg>
                 <View style={ResetPasswordStyles.centerContent}>
-                    <Image style={ResetPasswordStyles.logo} source={require("../../../../assets/logo1.png")} />
+                    <Image style={ResetPasswordStyles.logo} source={require("../../../../assets/app.png")} />
                     <Text style={ResetPasswordStyles.text}>AnChi</Text>
                 </View>
             </View>
