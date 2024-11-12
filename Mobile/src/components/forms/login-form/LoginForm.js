@@ -79,7 +79,7 @@ const LoginForm = (props) => {
         const login = async () => {
             if (!isSubmitting) return;
             try {
-                console.log(IP, PORT)
+                console.log(IP, PORT);
                 const response = await fetch(`http://${IP}:${PORT}/auth/login`, {
                     method: 'POST',
                     headers: {

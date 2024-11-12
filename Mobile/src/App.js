@@ -134,12 +134,12 @@ const app = (props) => {
                     <RootStack.Screen name="Splash" component={Splash} options={{ headerShown: false,}}/>
                     <RootStack.Screen name="AnimTab1" component={AnimTab1} />
                     <RootStack.Screen name="Detail" component={Detail} options={{transitionSpec: {open: config, close: config,},}}/>
-
+{/* 
                     <RootStack.Screen name="LoginScreen" component={LoginScreen} />
                     <RootStack.Screen name="SignupScreen" component={SignupScreen} />
                     <RootStack.Screen name="RecoveryScreen" component={RecoveryScreen} />
                     <RootStack.Screen name="VerifyScreen" component={VerificationScreen} />
-                    <RootStack.Screen name="ResetPasswordScreen" component={ResetPassword} />
+                    <RootStack.Screen name="ResetPasswordScreen" component={ResetPassword} /> */}
                 </RootStack.Navigator>
             </NavigationContainer>
         </PaperProvider>

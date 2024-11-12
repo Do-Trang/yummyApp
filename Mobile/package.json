@@ -30,7 +30,6 @@
     "react-native-dotenv": "^3.4.11",
     "react-native-fs": "^2.20.0",
     "react-native-gesture-handler": "^2.20.2",
-    "react-native-gradient-icon": "^0.2.1",
     "react-native-image-picker": "^7.1.2",
     "react-native-linear-gradient": "^2.8.3",
     "react-native-paper": "^5.12.5",

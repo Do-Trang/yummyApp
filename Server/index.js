@@ -11,9 +11,11 @@ app.use(cors());
 
 const authRouter = require('./routes/authRouter');
 const verifyRouter = require('./routes/verifyRouter');
+const profileRouter = require('./routes/profileRouter')
 
 app.use('/auth', authRouter);
 app.use('/verify', verifyRouter);
+app.use('/profile', profileRouter);
 
 // Start the server
 app.listen(PORT, () => {

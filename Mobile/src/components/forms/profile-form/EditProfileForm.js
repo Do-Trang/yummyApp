@@ -39,11 +39,13 @@ const EditProfileForm = () => {
 
     const uploadImage = async (uri) => {
         const fileName = uri.substring(uri.lastIndexOf('/') + 1);
-        const reference = storage().ref(`avatars/${fileName}`);
+        const reference = storage().ref(`foods/${fileName}`);
+        
 
         try {
             await reference.putFile(uri);
             const url = await reference.getDownloadURL();
+            console.log('Uploaded image URL:', url);
             
         } catch (error) {
             console.error('Upload failed: ', error);

@@ -9,7 +9,7 @@ import LinearGradient from 'react-native-linear-gradient';
 
 import GlobalStyle from '../styles/GlobalStyle';
 import Icon from './icons';
-import { Icon as GIcon } from 'react-native-gradient-icon';
+// import { Icon as GIcon } from 'react-native-gradient-icon';
 import * as Animatable from 'react-native-animatable';
 import colors from '../constants/colors';
 
@@ -79,7 +79,7 @@ export function CustomButtonOutline(props) {
             backgroundColor={props.colors[2]}
             style={styles.linearGradientOutline}
           >
-            <GIcon
+            {/* <GIcon
               size={props.size ? props.size : 26}
               style={{}}
               colors={[
@@ -89,7 +89,7 @@ export function CustomButtonOutline(props) {
               start={{ x: 1, y: 0 }}
               end={{ x: 0, y: 1 }}
               name={props.icon_name} type={props.type}
-            />
+            /> */}
           </Animatable.View>
         </LinearGradient>
       </Animatable.View>

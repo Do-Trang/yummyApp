@@ -103,7 +103,8 @@ const SignupForm = (props) => {
             if (isSubmitted) {
                 try {
                     const endpoint = selectedIndex === 0 ? 'signup/email' : 'signup/phone';
-    
+                    console.log(IP)
+                    console.log(PORT)
                     const response = await fetch(`http://${IP}:${PORT}/auth/${endpoint}`, {
                         method: 'POST',
                         headers: {

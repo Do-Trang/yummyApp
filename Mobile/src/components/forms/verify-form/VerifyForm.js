@@ -28,6 +28,8 @@ const VerificationForm = (props) => {
             const otpValue = otp.join('');
             const verifyOtp = async () => {
                 try {
+                    console.log(IP);
+                    console.log(PORT);
                     const response = await fetch(`http://${IP}:${PORT}/verify/verify-account`, {
                         method: 'POST',
                         headers: {
