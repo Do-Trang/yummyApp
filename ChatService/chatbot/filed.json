@@ -1,0 +1,19 @@
+{
+    "restaurant_name": "Tên của nhà hàng",
+    "restaurant_address": "Địa chỉ của nhà hàng, bao gồm số nhà, đường phố, quận/huyện và thành phố",
+    "phone_number": "Số điện thoại liên hệ với nhà hàng",
+    "restaurant_description": "Mô tả ngắn gọn về nhà hàng, bao gồm lịch sử, phong cách ẩm thực và điểm nổi bật",
+    "restaurant_rating_service": "Đánh giá về dịch vụ của nhà hàng, thường trên thang điểm từ 1 đến 10",
+    "restaurant_rating_price": "Đánh giá về mức giá của nhà hàng, cũng trên thang điểm từ 1 đến 10",
+    "restaurant_rating_food": "Đánh giá về chất lượng món ăn tại nhà hàng, trên thang điểm từ 1 đến 10",
+    "restaurant_rating_decoration": "Đánh giá về trang trí và không gian của nhà hàng, trên thang điểm từ 1 đến 10",
+    "restaurant_tags": "Các thẻ mô tả về nhà hàng, giúp người dùng dễ dàng tìm kiếm",
+    "food_name": "Tên của món ăn",
+    "food_description": "Mô tả về món ăn, bao gồm các thành phần, cách chế biến và hương vị",
+    "food_price": "Giá của món ăn",
+    "food_rating_delicious": "Đánh giá về độ ngon của món ăn, trên thang điểm từ 1 đến 10",
+    "food_rating_presentation": "Đánh giá về cách trình bày món ăn, trên thang điểm từ 1 đến 10",
+    "food_rating_price": "Đánh giá về mức giá của món ăn, trên thang điểm từ 1 đến 10",
+    "food_rating_fresh": "Đánh giá về độ tươi ngon của nguyên liệu món ăn, trên thang điểm từ 1 đến 10",
+    "food_tags": "Các thẻ mô tả về món ăn, giúp người dùng dễ dàng tìm kiếm"
+}
