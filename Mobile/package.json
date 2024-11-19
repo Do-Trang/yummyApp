@@ -21,6 +21,7 @@
     "@react-navigation/native": "^6.1.18",
     "@react-navigation/stack": "^6.4.1",
     "@reduxjs/toolkit": "^2.3.0",
+    "axios": "^1.7.7",
     "install": "^0.13.0",
     "Mobile": "file:",
     "npm": "^10.9.0",

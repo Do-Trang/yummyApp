@@ -3,7 +3,7 @@ const bcrypt = require('bcryptjs');
 
 const getMyProfile = async (userId) => {
     const user = await User.findByPk(userId, {
-        attributes: ['user_id', 'username', 'email', 'phone_number', 'dob', 'avatar_url', 'gender', 'address']
+        attributes: ['user_id', 'username', 'email', 'phone_number', 'dob', 'avatar_url', 'gender', 'address', 'description']
     });
 
     if (!user) {

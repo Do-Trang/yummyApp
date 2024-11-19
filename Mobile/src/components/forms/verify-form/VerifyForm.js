@@ -4,6 +4,7 @@ import VerifyFormStyles from './VerifyFormStyles';
 import Snackbar from "react-native-snackbar";
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import {IP, PORT} from '@env'
+import client from '../../../utils/axios'
 
 const VerificationForm = (props) => {
     const [timeRemaining, setTimeRemaining] = useState(300);
@@ -26,44 +27,50 @@ const VerificationForm = (props) => {
     useEffect(() => {
         if (isSubmitted) {
             const otpValue = otp.join('');
-            const verifyOtp = async () => {
-                try {
-                    console.log(IP);
-                    console.log(PORT);
-                    const response = await fetch(`http://${IP}:${PORT}/verify/verify-account`, {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                        },
-                        body: JSON.stringify({ account: props.account, otp: otpValue }),
+            const verifyOtp = () => {
+                console.log(IP, PORT);
+                
+                client.post(`/verify/verify-account`, {
+                    account: props.account,
+                    otp: otpValue
+                })
+                .then((response) => {
+                    const data = response.data;
+
+                    Snackbar.show({
+                        text: "Account verified successfully!",
+                        duration: Snackbar.LENGTH_SHORT,
+                        backgroundColor: "green",
                     });
 
-                    const data = await response.json();
-                    console.log(data)
-                    if (data.success) {
-                        Snackbar.show({
-                            text: "Account verified successfully!",
-                            duration: Snackbar.LENGTH_SHORT,
-                            backgroundColor: "green",
-                        });
-
-                        await AsyncStorage.setItem('accessToken', data.accessToken);
-                        await AsyncStorage.setItem('refreshToken', data.refreshToken);
-                        props.navigation.navigate('AnimTab1')
+                    // Lưu accessToken và refreshToken vào AsyncStorage
+                    AsyncStorage.setItem('accessToken', data.accessToken);
+                    AsyncStorage.setItem('refreshToken', data.refreshToken);
+                    props.navigation.navigate('AnimTab1');
+                })
+                .catch((error) => {
+                    // Phân biệt lỗi theo mã trạng thái
+                    if (error.response) {
+                        if (error.response.status === 404) {
+                            setErrorMessage('User not found.');
+                        } else if (error.response.status === 400) {
+                            setErrorMessage('Invalid OTP.');
+                        } else {
+                            setErrorMessage("An error occurred. Please try again later.");
+                        }
                     } else {
-                        setErrorMessage("False OTP");
+                        console.error("Error during account verification:", error);
+                        setErrorMessage("An unexpected error occurred.");
                     }
-                } catch (error) {
-                    console.log("Error during account verification:", error);
-                    setErrorMessage("An error occurred. Please try again later.");
-                } finally {
+                })
+                .finally(() => {
                     setIsSubmitted(false);
-                }
+                });
             };
-
+    
             verifyOtp();
         }
-    }, [isSubmitted]);
+    }, [isSubmitted]);    
 
 
     // Countdown time to submit OTP.
@@ -131,36 +138,34 @@ const VerificationForm = (props) => {
 
     useEffect(() => {
         if (isResending) {
-            const resendOtp = async () => {
-                try {
-                    const response = await fetch(`http://${IP}:${PORT}/verify/resend-otp-verification`, {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                        },
-                        body: JSON.stringify({ account: props.account }),
-                    });
+            client.post('/verify/resend-otp-verification', {
+                account: props.account
+            })
+            .then((response) => {
+                const data = response.data;
+                console.log("OTP sent successfully:", data);
+                Snackbar.show({
+                    text: "OTP sent successfully!",
+                    duration: Snackbar.LENGTH_SHORT,
+                    backgroundColor: "green",
+                });
 
-                    const data = await response.json();
-                    if (response.ok) {
-                        console.log("OTP sent successfully:", data);
-                        Snackbar.show({
-                            text: "OTP sent successfully!",
-                            duration: Snackbar.LENGTH_SHORT,
-                            backgroundColor: "green",
-                        });
+            })
+            .catch((error) => {
+                if (error.response) {
+                    if (error.response.status === 404) {
+                        setErrorMessage("User not found. Please check your account.");
                     } else {
-                        setErrorMessage(data.message || 'Failed to resend OTP.');
+                        setErrorMessage(error.response.data.message || 'An error occurred when sending OTP.');
                     }
-                } catch (error) {
-                    console.log("Error during sending OTP:", error);
-                    setErrorMessage("An error occurred when sending OTP");
-                } finally {
-                    setIsResending(false);
+                } else {
+                    console.error("Error during sending OTP:", error);
+                    setErrorMessage("An unexpected error occurred.");
                 }
-            };
-
-            resendOtp();
+            })
+            .finally(() => {
+                setIsResending(false);
+            });
         }
     }, [isResending]);
 

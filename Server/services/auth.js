@@ -284,7 +284,36 @@ const resetUserPassword = async (account, newPassword) => {
     };
 };
 
+const changePassword = async (userId, oldPassword, newPassword) => {
+    const user = await User.findOne({
+        where: { user_id: userId },
+        attributes: ['user_id', 'password']
+    });
+
+    if (!user) {
+        return { success: false, message: 'User not found.' };
+    }
+
+    const isOldPasswordValid = await bcrypt.compare(oldPassword, user.password);
+    if (!isOldPasswordValid) {
+        return { success: false, message: 'Old password is incorrect.' };
+    }
+
+    const hashedNewPassword = await bcrypt.hash(newPassword, 10);
+
+    await User.update(
+        { password: hashedNewPassword },
+        { where: { user_id: userId } }
+    );
+
+    return {
+        success: true,
+        message: 'Password has been changed successfully.'
+    };
+};
+
 module.exports = {
+    changePassword,
     signupWithPhoneNumber,
     signupWithEmail,
     login,

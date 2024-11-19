@@ -30,5 +30,7 @@ authRouter.post('/logout', isAuth, AuthController.logout);
 // Route to reset the password
 authRouter.patch('/reset-password', validateResetPassword, AuthController.resetPassword);
 
+// Route to change the user password
+authRouter.patch('/change-password', isAuth, AuthController.changePassword);
 
 module.exports = authRouter;

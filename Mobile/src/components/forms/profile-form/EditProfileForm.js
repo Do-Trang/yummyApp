@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { View, Text, TextInput, SafeAreaView, ScrollView, TouchableOpacity, Image } from 'react-native';
+import React, { useState, useEffect } from 'react';
+import { View, Text, TextInput, SafeAreaView, ScrollView, TouchableOpacity, Image, Button } from 'react-native';
 import editProfileFormStyles from './EditProfileFormStyles';
 import Icon from "react-native-vector-icons/Ionicons";
 import { RadioButton } from 'react-native-paper';
@@ -8,15 +8,26 @@ import { launchImageLibrary } from 'react-native-image-picker';
 import storage from '@react-native-firebase/storage';
 import Snackbar from "react-native-snackbar";
 
-const EditProfileForm = () => {
-    const [date, setDate] = useState(new Date());
+const EditProfileForm = (props) => {
+    const { avatar_url, username, address, gender, dob, description, onSave } = props;
+
+    const [date, setDate] = useState(new Date(dob));
     const [showCalendar, setShowCalendar] = useState(false);
-    const [description, setDescription] = useState("");
-    const [username, setUsername] = useState("");
-    const [address, setAddress] = useState("");
-    const [gender, setGender] = useState("");
-    const [avatar, setAvatar] = useState(null);
+    const [currentDescription, setDescription] = useState(description || "");
+    const [currentUsername, setUsername] = useState(username || "");
+    const [currentAddress, setAddress] = useState(address || "");
+    const [currentGender, setGender] = useState(gender || "");
+    const [currentAvatar, setAvatar] = useState(avatar_url || null);
     const maxWords = 500;
+
+    useEffect(() => {
+        setUsername(username);
+        setAddress(address);
+        setGender(gender);
+        setDate(new Date(dob));
+        setDescription(description);
+        setAvatar(avatar_url);
+    }, [username, address, gender, dob, description, avatar_url]);
 
     const changeProfilePicture = () => {
         const options = {
@@ -40,16 +51,13 @@ const EditProfileForm = () => {
     const uploadImage = async (uri) => {
         const fileName = uri.substring(uri.lastIndexOf('/') + 1);
         const reference = storage().ref(`foods/${fileName}`);
-        
 
         try {
             await reference.putFile(uri);
             const url = await reference.getDownloadURL();
             console.log('Uploaded image URL:', url);
-            
         } catch (error) {
             console.error('Upload failed: ', error);
-            
         }
     };
 
@@ -59,6 +67,7 @@ const EditProfileForm = () => {
     };
 
     const handleDescriptionChange = (text) => {
+        console.log("type", typeof(text))
         const wordCount = text.trim().split(/\s+/).length;
         if (wordCount <= maxWords) {
             setDescription(text);
@@ -80,21 +89,41 @@ const EditProfileForm = () => {
         return `${year}-${month}-${day}`;
     };
 
+    const handleSave = () => {
+        if (onSave) {
+            onSave({
+                avatar: currentAvatar,
+                username: currentUsername,
+                address: currentAddress,
+                gender: currentGender,
+                dob: formatDateToString(date),
+                description: currentDescription,
+            });
+            props.navigation.goBack();
+            Snackbar.show({
+                text: 'Profile saved successfully!',
+                duration: Snackbar.LENGTH_SHORT,
+                backgroundColor: 'green',
+                textColor: 'white',
+            });
+        }
+    };
+
     return (
         <SafeAreaView style={editProfileFormStyles.container}>
             <ScrollView style={editProfileFormStyles.scrollContainer}>
                 <View style={editProfileFormStyles.avatarContainer}>
                     {
-                        avatar ? (
-                        <Image 
-                            source={{ uri: avatar }}
-                            style={editProfileFormStyles.avatar}
-                        />
+                        currentAvatar ? (
+                            <Image 
+                                source={{ uri: currentAvatar }}
+                                style={editProfileFormStyles.avatar}
+                            />
                         ) : (
-                        <Image 
-                            source={require('../../../../assets/profile/avatar.jpg')}
-                            style={editProfileFormStyles.avatar}
-                        />
+                            <Image 
+                                source={require('../../../../assets/profile/avatar.jpg')}
+                                style={editProfileFormStyles.avatar}
+                            />
                         )
                     }
                     <TouchableOpacity onPress={changeProfilePicture}>
@@ -106,24 +135,12 @@ const EditProfileForm = () => {
                 </View>
 
                 <View style={{ flexDirection: "column" }}>
-                    <Text style={editProfileFormStyles.label}>Account</Text>
-                    <View style={editProfileFormStyles.inputContainer}>
-                        <TextInput 
-                            style={editProfileFormStyles.input}
-                            editable={false}
-                            value="My account"
-                        />
-                        <Icon name="person-outline" size={20} style={editProfileFormStyles.icon} />
-                    </View>
-                </View>
-
-                <View style={{ flexDirection: "column" }}>
                     <Text style={editProfileFormStyles.label}>Username</Text>
                     <View style={editProfileFormStyles.inputContainer}>
                         <TextInput 
                             style={editProfileFormStyles.input}
                             placeholder="Enter your nickname"
-                            value={username}
+                            value={currentUsername}
                             onChangeText={handleUsernameChange}
                         />
                         <Icon name="person-outline" size={20} style={editProfileFormStyles.icon} />
@@ -132,21 +149,25 @@ const EditProfileForm = () => {
 
                 <View>
                     <Text style={editProfileFormStyles.label}>Gender</Text>
-                    <RadioButton.Group onValueChange={setGender} value={gender}>
+                    <RadioButton.Group
+                        onValueChange={(newValue) => setGender(newValue === "Male")}
+                        value={gender ? "Male" : "Female"}
+                    >
                         <View style={editProfileFormStyles.radioGroupContainer}>
-                            <View style={editProfileFormStyles.radioOption}> 
-                                <RadioButton value="Male" color="blue" uncheckedColor='gray'/>
-                                <Text>Male</Text>
-                                <Icon name="male" size={24} color="blue" style={editProfileFormStyles.genderIcon} />
-                            </View>
-                            <View style={editProfileFormStyles.radioOption}>
-                                <RadioButton value="Female" color="pink" uncheckedColor='gray' />
-                                <Text>Female</Text>
-                                <Icon name="female" size={24} color="pink" style={editProfileFormStyles.genderIcon} />
-                            </View>
+                        <View style={editProfileFormStyles.radioOption}>
+                            <RadioButton value="Male" color="blue" uncheckedColor="gray" />
+                            <Text>Male</Text>
+                            <Icon name="male" size={24} color="blue" style={editProfileFormStyles.genderIcon} />
+                        </View>
+                        <View style={editProfileFormStyles.radioOption}>
+                            <RadioButton value="Female" color="pink" uncheckedColor="gray" />
+                            <Text>Female</Text>
+                            <Icon name="female" size={24} color="pink" style={editProfileFormStyles.genderIcon} />
+                        </View>
                         </View>
                     </RadioButton.Group>
                 </View>
+
 
                 <View style={{ flexDirection: "column" }}>
                     <Text style={editProfileFormStyles.label}>Dob</Text>
@@ -175,7 +196,7 @@ const EditProfileForm = () => {
                         <TextInput 
                             style={editProfileFormStyles.input}
                             placeholder="Enter your address..."
-                            value={address}
+                            value={currentAddress}
                             onChangeText={handleAddressChange}
                         />
                         <Icon name="home-outline" size={20} style={editProfileFormStyles.icon} />
@@ -188,16 +209,22 @@ const EditProfileForm = () => {
                         style={editProfileFormStyles.textArea}
                         placeholder="Tell us about yourself..."
                         multiline={true}
-                        value={description}
+                        value={currentDescription}
                         onChangeText={handleDescriptionChange}
                     />
                     <Text style={editProfileFormStyles.wordCount}>
-                        {description.trim().length}/{maxWords} words
+                        {currentDescription.trim().split(/\s+/).length} / {maxWords} words
                     </Text>
                 </View>
+
+                <Button
+                title="Save"
+                onPress={handleSave}
+                color="#007BFF" // Tùy chọn để thay đổi màu nền của Button
+                />
             </ScrollView>
         </SafeAreaView>
     );
-}
+};
 
 export default EditProfileForm;

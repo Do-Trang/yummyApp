@@ -6,7 +6,8 @@ const { signupWithEmail,
         refreshAccessToken,
         forgotPassword,
         logout,
-        resetUserPassword } = require('../services/auth.js');
+        resetUserPassword,
+        changePassword } = require('../services/auth.js');
 
 dotenv.config();
 
@@ -63,9 +64,11 @@ class AuthController {
     async login(req, res) {
         const { account, password } = req.body;
         const isEmail = req.isEmail;
+        console.log("Hi")
 
         try {
             const result = await login(account, password, isEmail);
+            console.log(result)
             
             let statusCode;
             if (!result.success) {
@@ -78,7 +81,7 @@ class AuthController {
 
             return res.status(statusCode).json(result);
         } catch (error) {
-            console.error('Error during login:', error);
+            console.log('Error during login:', error);
             return res.status(500).json({ 
                 success: false,
                 message: 'An error occurred during the login process.' 
@@ -180,6 +183,36 @@ class AuthController {
             return res.status(500).json({
                 success: false,
                 message: 'An error occurred while resetting the password.',
+            });
+        }
+    }
+
+    // @route [PATCH] /auth/change-password
+    // @desc Change user password
+    // @access Private
+    async changePassword(req, res) {
+        const { currentPassword, newPassword } = req.body;
+        const userId = req.user_id;
+
+        try {
+            const result = await changePassword(userId, currentPassword, newPassword);
+
+            if (result.success) {
+                return res.status(200).json(result);
+            } else {
+                if (result.message === 'User not found.') {
+                    return res.status(404).json(result); // Not Found
+                } else if (result.message === 'Old password is incorrect.') {
+                    return res.status(401).json(result); // Unauthorized
+                } else {
+                    return res.status(400).json(result); // General failure (invalid input or other issues)
+                }
+            }
+        } catch (error) {
+            console.error('Error during password change:', error);
+            return res.status(500).json({
+                success: false,
+                message: 'An error occurred while changing the password.',
             });
         }
     }

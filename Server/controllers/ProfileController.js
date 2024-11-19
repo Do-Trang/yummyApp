@@ -24,7 +24,7 @@ class ProfileController {
         });
     }
 
-    // @route [POST] /edit-profile
+    // @route [POST] /profile/edit-profile
     // @desc Edit user profile by user ID
     // @access Private
     async editUserProfile(req, res) {

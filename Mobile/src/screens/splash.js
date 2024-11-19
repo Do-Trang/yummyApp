@@ -6,8 +6,8 @@ import GlobalStyle from '../styles/GlobalStyle';
 function Splash({ navigation }) {
     React.useEffect(() => {
         setTimeout(() => {
-            // navigation.replace('LoginScreen');
-            navigation.replace('AnimTab1');
+            navigation.replace('LoginScreen');
+            // navigation.replace('AnimTab1');
         }, 1000);
     }, []);
 
