@@ -21,3 +21,6 @@ Hỏi GPT cách chuyển là OK.
 # Bước 4:
 Gõ lệnh: python genAI.py
 Gõ lệnh : python ai_service.py
+
+
+10.10.10.
