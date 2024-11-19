@@ -51,6 +51,12 @@ const getFoodByCriteria = async (name = '', minPrice = null, maxPrice = null, ta
 
     const foods = await Food.findAll({
         where: whereConditions,
+        include: [
+            {
+                model: Restaurant,
+                attributes: ['name', 'address']
+            }
+        ],
         attributes: ['food_id', 'name', 'description', 'price', 'image_url', 'rating', 'tags']
     });
 
@@ -65,7 +71,9 @@ const getFoodByCriteria = async (name = '', minPrice = null, maxPrice = null, ta
             const foodData = food.toJSON();
             if (foodData.rating) {
                 foodData.rating = JSON.parse(foodData.rating);
-            }
+            }           
+            foodData.restaurantName = foodData.Restaurant.name;
+            foodData.restaurantAddress = foodData.Restaurant.address;
             return foodData;
         })
     };
@@ -160,9 +168,39 @@ const updateFood = async (foodId, name, description, price, restaurant_name, ima
     };
 };
 
+const getMyFood = async (userId) => {
+    try {
+        const foods = await Food.findAll({
+            where: { user_id: userId },
+            attributes: ['food_id', 'name', 'description', 'price', 'image_url', 'rating', 'tags']
+        });
+
+        if (foods.length === 0) {
+            return { success: false, message: 'No food found for this user.' };
+        }
+
+        return {
+            success: true,
+            message: 'Foods retrieved successfully!',
+            foods: foods.map(food => {
+                const foodData = food.toJSON();
+                if (foodData.rating) {
+                    foodData.rating = JSON.parse(foodData.rating);
+                }
+                return foodData;
+            })
+        };
+    } catch (error) {
+        console.error('Error in getMyFood:', error);
+        return { success: false, message: 'Error retrieving foods.' };
+    }
+};
+
+
 module.exports = {
     getFoodByCriteria,
     addFood,
     deleteFood,
-    updateFood
+    updateFood,
+    getMyFood
 };

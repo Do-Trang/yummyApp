@@ -7,7 +7,9 @@ const profileFormStyles = StyleSheet.create({
         backgroundColor: 'white',
     },
     scrollContainer: {
-        padding: 16,
+        paddingBottom: 50,
+        paddingHorizontal: 10,
+        flexGrow: 1,
     },
     avatarContainer: {
         alignItems: 'center',

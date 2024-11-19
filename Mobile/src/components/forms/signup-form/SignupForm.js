@@ -7,6 +7,7 @@ import Icon from "react-native-vector-icons/Ionicons";
 import SegmentedControl from "@react-native-community/segmented-control";
 import SignupFormStyles from "./SignupFormStyles";
 import {IP, PORT} from '@env'
+import client from '../../../utils/axios'
 
 const validateEmail = (email) => {
     const PATTERN = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
@@ -99,47 +100,44 @@ const SignupForm = (props) => {
     };
 
     useEffect(() => {
-        const signup = async () => {
+        const signup = () => {
             if (isSubmitted) {
-                try {
-                    const endpoint = selectedIndex === 0 ? 'signup/email' : 'signup/phone';
-                    console.log(IP)
-                    console.log(PORT)
-                    const response = await fetch(`http://${IP}:${PORT}/auth/${endpoint}`, {
-                        method: 'POST',
-                        headers: {
-                            "Content-Type": "application/json",
-                        },
-                        body: JSON.stringify({
-                            username: username,
-                            account: account,
-                            password: password,
-                        }),
+                const endpoint = selectedIndex === 0 ? 'signup/email' : 'signup/phone';
+                console.log(IP, PORT);
+    
+                client.post(`/auth/${endpoint}`, {
+                    username: username,
+                    account: account,
+                    password: password,
+                })
+                .then((response) => {
+                    const data = response.data;
+
+                    Snackbar.show({
+                        text: data.message,
+                        duration: Snackbar.LENGTH_SHORT,
+                        backgroundColor: "green",
                     });
-    
-                    const data = await response.json();
-    
-                    if (response.ok) {
-                        Snackbar.show({
-                            text: data.message,
-                            duration: Snackbar.LENGTH_SHORT,
-                            backgroundColor: "green",
-                        });
-                        props.navigation.navigate("VerifyScreen", { account: account });
-                    } else {
-                        setStatusAccount(data.message);
-                    }
-                } catch (error) {
+                    props.navigation.navigate("VerifyScreen", { account: account });
+                })
+                .catch((error) => {
                     console.log("Error during signup:", error);
-                    setStatusAccount("An error occurred. Please try again later.");
-                } finally {
+    
+                    if (error.response && error.response.status === 400) {
+                        const data = error.response.data;
+                        setStatusAccount(data.message);
+                    } else {
+                        setStatusAccount("An error occurred. Please try again later.");
+                    }
+                })
+                .finally(() => {
                     setIsSubmitted(false);
-                }
+                });
             }
         };
     
         signup();
-    }, [isSubmitted, selectedIndex]);     
+    }, [isSubmitted]);         
            
     // Move to login screen.
     const handleLoginRedirect = () => {

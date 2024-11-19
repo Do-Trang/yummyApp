@@ -19,7 +19,8 @@ import Favorite from './screens/favorite';
 import Search from './screens/search';
 import Home from './screens/home';
 import Add from './screens/add';
-import Menu from './screens/menu';
+// import Menu from './screens/menu';
+import Profile from './screens/profile';
 import Splash from './screens/splash';
 import Detail from './screens/detail';
 
@@ -28,6 +29,10 @@ import SignupScreen from './screens/signup';
 import RecoveryScreen from './screens/recovery';
 import VerificationScreen from './screens/verify';
 import ResetPassword from './screens/resetpassword';
+
+import ProfileDetailScreen from './screens/profile-detail';
+import EditProfileScreen from './screens/edit-profile'
+import ChangePasswordScreen from './screens/changepassword'
 
 import GlobalStyle from './styles/GlobalStyle';
 import colors from './constants/colors';
@@ -93,6 +98,34 @@ const TabButton = props => {
     );
 };
 
+const Stack = createStackNavigator();
+const MenuStack = () => {
+  return (
+    <Stack.Navigator>
+      <Stack.Screen 
+        name="Menu" 
+        component={Profile} 
+        options={{ headerShown: false }} 
+      />
+      <Stack.Screen 
+        name="EditProfileScreen" 
+        component={EditProfileScreen} 
+        options={{ headerShown: false }}
+      />
+      <Stack.Screen 
+        name="ProfileDetailScreen" 
+        component={ProfileDetailScreen} 
+        options={{ headerShown: false }} 
+      />
+      <Stack.Screen 
+        name="ChangePasswordScreen" 
+        component={ChangePasswordScreen} 
+        options={{ headerShown: false }} 
+      />
+    </Stack.Navigator>
+  );
+};
+
 // Anim tab
 const Tab = createBottomTabNavigator();
 export function AnimTab1() {
@@ -101,7 +134,8 @@ export function AnimTab1() {
         { route: 'Favorite', label: 'Favorite', type: Icons.Feather, icon: 'heart', component: Favorite, },
         { route: 'Home', label: 'Home', type: Icons.Feather, icon: 'home', component: Home, },
         { route: 'Search', label: 'Search', type: Icons.Feather, icon: 'search', component: Search, },
-        { route: 'Menu', label: 'Menu', type: Icons.Feather, icon: 'menu', component: Menu, },
+        // { route: 'Menu', label: 'Menu', type: Icons.Feather, icon: 'menu', component: Menu, },
+        { route: 'Menu', label: 'Menu', type: Icons.Feather, icon: 'menu', component: MenuStack, }
     ];
     return (
         <Tab.Navigator screenOptions={{headerShown: false, tabBarStyle: styles.tabBar,}} initialRouteName="Home">

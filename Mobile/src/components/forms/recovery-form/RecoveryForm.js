@@ -3,6 +3,7 @@ import { View, Text, TextInput, TouchableOpacity, Image, StyleSheet, KeyboardAvo
 import RecoveryFormStyles from './RecoveryFormStyles'; 
 import Snackbar from "react-native-snackbar";
 import {IP, PORT} from '@env'
+import client from '../../../utils/axios'
 
 const RecoveryForm = (props) => {
     const [timeRemaining, setTimeRemaining] = useState(300);
@@ -23,45 +24,46 @@ const RecoveryForm = (props) => {
         setIsSubmitted(true);
     };
     useEffect(() => {
-        const verifyAccount = async () => {
-            if (isSubmitted) {
-                const otpValue = otp.join('');
-                try {
-                    const response = await fetch(`http://${IP}:${PORT}/verify/verify-account`, {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                        },
-                        body: JSON.stringify({ account: props.account, otp: otpValue }),
-                    });
-    
-                    const data = await response.json();
-                    console.log(data);
-    
-                    if (data.success) {
-                        console.log("Account verified successfully:", data);
-                        Snackbar.show({
-                            text: 'Account verified successfully!',
-                            duration: Snackbar.LENGTH_SHORT,
-                            backgroundColor: "green",
-                        });
+        if (isSubmitted) {
+            const otpValue = otp.join('');
+            console.log(IP, PORT);
 
-                        // Move to reset password screen
-                        props.navigation.navigate('ResetPasswordScreen', { account: props.account });
+            client.post('/verify/verify-account', {
+                account: props.account,
+                otp: otpValue,
+            })
+            .then((response) => {
+                const data = response.data;
+                console.log(data);
+
+                Snackbar.show({
+                    text: 'Account verified successfully!',
+                    duration: Snackbar.LENGTH_SHORT,
+                    backgroundColor: "green",
+                });
+
+                // Chuyển sang màn hình reset password
+                props.navigation.navigate('ResetPasswordScreen', { account: props.account });
+            })
+            .catch((error) => {
+                if (error.response) {
+                    if (error.response.status === 400) {
+                        setErrorMessage("Invalid OTP. Please check and try again.");
+                    } else if (error.response.status === 404) {
+                        setErrorMessage("Account not found. Please check your details.");
                     } else {
-                        setErrorMessage("False OTP");
+                        setErrorMessage(error.response.data.message || "An error occurred. Please try again later.");
                     }
-                } catch (error) {
+                } else {
                     console.log("Error during account verification", error);
-                    setErrorMessage("An error occurred. Please try again later.");
-                } finally {
-                    setIsSubmitted(false);
+                    setErrorMessage("An unexpected error occurred.");
                 }
-            }
-        };
-    
-        verifyAccount();
-    }, [isSubmitted]);    
+            })
+            .finally(() => {
+                setIsSubmitted(false);
+            });
+        }
+    }, [isSubmitted]);
 
     // Countdown time to submit OTP.
     useEffect(() => {
@@ -129,32 +131,32 @@ const RecoveryForm = (props) => {
         const resendOTP = async () => {
             if (isResending) {
                 try {
-                    const response = await fetch(`http://${IP}:${PORT}/verify/resend-otp-recovery`, {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                        },
-                        body: JSON.stringify({
-                            account: props.account,
-                        }),
+                    const response = await client.post('/verify/resend-otp-recovery', {
+                        account: props.account,
                     });
     
-                    const data = await response.json();
-                    console.log(data)
-    
-                    if (response.ok) {
-                        console.log("OTP sent successfully:", data);
-                        Snackbar.show({
-                            text: 'OTP sent successfully!',
-                            duration: Snackbar.LENGTH_SHORT,
-                            backgroundColor: "green",
-                        });
-                    } else {
-                        setErrorMessage(data.message || 'Failed to resend OTP.');
-                    }
+                    const data = response.data;
+                    console.log(data);
+
+                    Snackbar.show({
+                        text: 'OTP sent successfully!',
+                        duration: Snackbar.LENGTH_SHORT,
+                        backgroundColor: "green",
+                    });
+
                 } catch (error) {
-                    console.log("Error during sending OTP:", error);
-                    setErrorMessage("An error occurred when sending OTP");
+                    if (error.response) {
+                        if (error.response.status === 400) {
+                            setErrorMessage(error.response.data.message || 'Invalid account details. Please check and try again.');
+                        } else if (error.response.status === 404) {
+                            setErrorMessage(error.response.data.message  || 'Account not found. Please check your details.');
+                        } else {
+                            setErrorMessage(error.response.data.message || 'Failed to resend OTP.');
+                        }
+                    } else {
+                        console.log("Error during sending OTP:", error);
+                        setErrorMessage("An unexpected error occurred.");
+                    }
                 } finally {
                     setIsResending(false);
                 }
@@ -162,7 +164,7 @@ const RecoveryForm = (props) => {
         };
     
         resendOTP();
-    }, [isResending]);
+    }, [isResending]);    
 
     return (
         <KeyboardAvoidingView 

@@ -6,6 +6,7 @@ import Snackbar from "react-native-snackbar";
 import ResetPasswordStyles from "./ResetPasswordFormStyles";
 import Icon from "react-native-vector-icons/Ionicons";
 import {IP, PORT} from '@env'
+import client from '../../../utils/axios'
 
 const isValidPassword = (password) => {
     const PATTERN = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&.]{8,}$/;
@@ -47,42 +48,43 @@ const ResetPasswordForm = (props) => {
     };
 
     useEffect(() => {
-        const resetPassword = async () => {
-            if (isSubmitted) {
-                try {
-                    const response = await fetch(`http://${IP}:${PORT}/auth/reset-password`, {
-                        method: 'PATCH',
-                        headers: {
-                            "Content-Type": "application/json",
-                        },
-                        body: JSON.stringify({
-                            account: props.account,
-                            newPassword: newPassword,
-                        }),
+        if (isSubmitted) {
+            client.patch(`/auth/reset-password`, {
+                account: props.account,
+                newPassword: newPassword,
+            })
+            .then((response) => {
+                const data = response.data;
+    
+                if (response.status === 200 && data.success) {
+                    Snackbar.show({
+                        text: data.message,
+                        duration: Snackbar.LENGTH_SHORT,
+                        backgroundColor: "green",
                     });
-
-                    const data = await response.json();
-
-                    if (response.ok) {
-                        Snackbar.show({
-                            text: data.message,
-                            duration: Snackbar.LENGTH_SHORT,
-                            backgroundColor: "green",
-                        });
-                        props.navigation.navigate("LoginScreen");
-                    } else {
-                        setStatusPassword(data.message);
-                    }
-                } catch (error) {
-                    console.log("Error during reset password:", error);
-                    setStatusPassword("An error occurred. Please try again later.");
-                } finally {
-                    setIsSubmitted(false);
+                    props.navigation.navigate("LoginScreen");
+                } else {
+                    setStatusPassword(data.message || "Failed to reset password.");
                 }
-            }
-        };
-
-        resetPassword();
+            })
+            .catch((error) => {
+                if (error.response) {
+                    if (error.response.status === 400) {
+                        setStatusPassword("Invalid request. Please check your details.");
+                    } else if (error.response.status === 404) {
+                        setStatusPassword("User not found. Please check your account.");
+                    } else {
+                        setStatusPassword(error.response.data.message || "An error occurred. Please try again later.");
+                    }
+                } else {
+                    console.error("Error during reset password:", error);
+                    setStatusPassword("An unexpected error occurred.");
+                }
+            })
+            .finally(() => {
+                setIsSubmitted(false);
+            });
+        }
     }, [isSubmitted]);
 
     return (

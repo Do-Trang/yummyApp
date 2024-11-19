@@ -1,20 +1,39 @@
-const { SwipedRestaurant } = require('../db/models');
+const { SwipedRestaurant, Restaurant } = require('../db/models');
 
 const getSwipedRestaurants = async (userId) => {
-    const swipedRestaurants = await SwipedRestaurant.findAll({
-        where: { user_id: userId },
-        attributes: ['swipe_id', 'restaurant_id', 'swipe_direction'],
-    });
+    try {
+        const swipedRestaurants = await SwipedRestaurant.findAll({
+            where: { 
+                user_id: userId,
+                swipe_direction: 'right',
+            },
+            attributes: ['restaurant_id'],
+            include: [
+                {
+                    model: Restaurant,
+                    as: 'restaurant',
+                    attributes: ['name', 'image_url'],
+                }
+            ],
+        });
 
-    if (swipedRestaurants.length === 0) {
-        return { success: false, message: 'No swiped restaurants found for this user.' };
+        if (swipedRestaurants.length === 0) {
+            return { success: false, message: 'No swiped restaurants found for this user.' };
+        }
+
+        return {
+            success: true,
+            message: 'Swiped restaurants retrieved successfully!',
+            swipedRestaurants: swipedRestaurants.map(swipe => ({
+                name: swipe.restaurantAlias.name,
+                image_url: swipe.restaurantAlias.image_url,
+                id: swipe.restaurant_id,
+            })),
+        };
+    } catch (error) {
+        console.error('Error in getSwipedRestaurants:', error);
+        return { success: false, message: 'Error retrieving swiped restaurants.' };
     }
-
-    return {
-        success: true,
-        message: 'Swiped restaurants retrieved successfully!',
-        swipedRestaurants: swipedRestaurants.map(swipe => swipe.toJSON()),
-    };
 };
 
 const addSwipedRestaurant = async (userId, restaurantId, swipeDirection) => {

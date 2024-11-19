@@ -8,10 +8,8 @@ import Icon from "react-native-vector-icons/Ionicons";
 import CheckBox from "@react-native-community/checkbox";
 import LoginFormStyles from "./LoginFormStyles";
 import Snackbar from "react-native-snackbar";
-//import {IP, PORT} from '@env'
-const IP = "10.10.67.14"
-const PORT = "3000"
-console.log(IP, PORT, "Haizz")
+import {IP, PORT} from '@env'
+import client from '../../../utils/axios'
 
 const validateEmail = (email) => {
     const PATTERN = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
@@ -77,65 +75,58 @@ const LoginForm = (props) => {
     };
 
     useEffect(() => {
-        const login = async () => {
+        const login = () => {
             if (!isSubmitting) return;
-            try {
-                console.log(IP, PORT);
-                const response = await fetch(`http://${IP}:${PORT}/auth/login`, {
-                    method: 'POST',
-                    headers: {
-                        "Content-Type": "application/json",
-                    },
-                    body: JSON.stringify({
-                        account,
-                        password,
-                    }),
-                });
-    
-                const data = await response.json();
-    
-                if (response.ok) {
-                    Snackbar.show({
-                        text: data.message,
-                        duration: Snackbar.LENGTH_SHORT,
-                        backgroundColor: "green",
-                    });
-    
-                    if (isChecked) {
-                        await AsyncStorage.setItem('account', account);
-                        await AsyncStorage.setItem('password', password);
-                        await AsyncStorage.setItem('rememberMe', 'true');
-                    } else {
-                        await AsyncStorage.removeItem('account');
-                        await AsyncStorage.removeItem('password');
-                        await AsyncStorage.removeItem('rememberMe');
-                    }
-    
-                    if(response.status == 200) {
-                        await AsyncStorage.setItem('accessToken', data.accessToken);
-                        await AsyncStorage.setItem('refreshToken', data.refreshToken);
+            console.log(IP, PORT)
+
+            client.post(`/auth/login`, { account, password })
+                .then((response) => {
+                    console.log(response)
+                    const data = response.data;
+                    if (response.status === 200 && data.success) {
+                        Snackbar.show({
+                            text: data.message,
+                            duration: Snackbar.LENGTH_SHORT,
+                            backgroundColor: "green",
+                        });
+
+                        if (isChecked) {
+                            AsyncStorage.setItem('account', account);
+                            AsyncStorage.setItem('password', password);
+                            AsyncStorage.setItem('rememberMe', 'true');
+                        } else {
+                            AsyncStorage.removeItem('account');
+                            AsyncStorage.removeItem('password');
+                            AsyncStorage.removeItem('rememberMe');
+                        }
+
+                        AsyncStorage.setItem('accessToken', data.accessToken);
+                        AsyncStorage.setItem('refreshToken', data.refreshToken);
                         props.navigation.navigate("AnimTab1");
                     } else {
                         props.navigation.navigate("VerifyScreen", { account: account });
                     }
-                } else {
-                    if(data.message == "Non-exist user.") {
-                        setStatusAccount(data.message || "Login failed. Please try again.");
+                })
+                .catch((error) => {
+                    console.log("Error during login:", error);
+                    if (error.response) {
+                        if(error.response.data.message == "Non-exist user.") {
+                            setStatusAccount(error.response.data.message);
+                        }
+                        else {
+                            setStatusPassword(error.response.data.message)
+                        }
+                    } else {
+                        setStatusAccount("An error occurred. Please try again later.");
                     }
-                    else {
-                        setStatusPassword(data.message || "Login failed. Please try again.");
-                    }
-                }
-            } catch (error) {
-                console.log("Error during login:", error);
-                setStatusAccount("An error occurred. Please try again later.");
-            } finally {
-                setIsSubmitting(false);
-            }
+                })
+                .finally(() => {
+                    setIsSubmitting(false);
+                });
         };
-    
+
         login();
-    }, [isSubmitting]);    
+    }, [isSubmitting]);
 
     // Move to signup screen
     const handleSignup = () => {
@@ -143,38 +134,37 @@ const LoginForm = (props) => {
     };
 
     // Move to recovery screen.
-    const handleForgotPassword = async () => {
+    const handleForgotPassword = () => {
         if (!account) {
             setStatusAccount("Account cannot be empty");
             return;
         }
-        
-        try {
-            const response = await fetch(`http://${IP}:${PORT}/auth/forgot-password`, {
-                method: 'POST',
-                headers: {
-                    "Content-Type": "application/json",
-                },
-                body: JSON.stringify({ account }),
-            });
-            
-            const data = await response.json();
-            
-            if (response.ok) {
+    
+        console.log(IP, PORT);
+    
+        client.post(`/auth/forgot-password`, { account })
+            .then((response) => {
+                console.log(response)
+                const data = response.data;
+
                 Snackbar.show({
                     text: data.message || "Verification code sent.",
                     duration: Snackbar.LENGTH_SHORT,
                     backgroundColor: "green",
                 });
-                props.navigation.navigate("RecoveryScreen", { account : account });
-            } else {
-                setStatusAccount(data.message || "Invalid account. Please check your details.");
-            }
-        } catch (error) {
-            console.error("Error during forgot password:", error);
-            setStatusAccount("An error occurred. Please try again later.");
-        }
-    };    
+                props.navigation.navigate("RecoveryScreen", { account: account });
+            })
+            .catch((error) => {
+                console.log(error)
+                if (error.response && error.response.status === 400) {
+                    const data = error.response.data;
+                    setStatusAccount(data.message || "Invalid account. Please check your details.");
+                } else {
+                    console.error("Error during forgot password:", error);
+                    setStatusAccount("An error occurred. Please try again later.");
+                }
+            });
+    };
 
     return (
         <KeyboardAvoidingView 

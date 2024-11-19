@@ -126,9 +126,42 @@ const deleteRestaurant = async (restaurantId) => {
     return { success: true, message: 'Restaurant deleted successfully!' };
 };
 
+const getMyRestaurant = async (userId) => {
+    try {
+        const restaurants = await Restaurant.findAll({
+            where: { user_id: userId },
+            attributes: [
+                'restaurant_id', 
+                'name', 
+                'address', 
+                'phone_number', 
+                'website', 
+                'description', 
+                'image_url', 
+                'rating', 
+                'tags'
+            ]
+        });
+
+        if (restaurants.length === 0) {
+            return { success: false, message: 'No restaurants found for this user.' };
+        }
+
+        return {
+            success: true,
+            message: 'Restaurants retrieved successfully!',
+            restaurants: restaurants.map(restaurant => restaurant.toJSON())
+        };
+    } catch (error) {
+        console.error('Error in getMyRestaurant:', error);
+        return { success: false, message: 'Error retrieving restaurants.' };
+    }
+};
+
 module.exports = {
     addRestaurant,
     deleteRestaurant,
     getRestaurantByCriteria,
-    updateRestaurant
+    updateRestaurant,
+    getMyRestaurant
 }
