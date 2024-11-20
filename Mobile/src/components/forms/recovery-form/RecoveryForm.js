@@ -2,7 +2,8 @@ import React, {useState, useEffect, useRef} from 'react';
 import { View, Text, TextInput, TouchableOpacity, Image, StyleSheet, KeyboardAvoidingView, Platform, ScrollView } from 'react-native';
 import RecoveryFormStyles from './RecoveryFormStyles'; 
 import Snackbar from "react-native-snackbar";
-import {IP, PORT} from '@env'
+//import {IP, PORT} from '@env'
+import {IP, PORT} from '../../../utils/axios';
 import client from '../../../utils/axios'
 
 const RecoveryForm = (props) => {
