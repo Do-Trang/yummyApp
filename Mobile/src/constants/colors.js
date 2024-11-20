@@ -19,10 +19,10 @@ export default Colors = {
     like2: '#6AF25E',
     
     darkGray: '#999999',
-    black: '#000',
+    black: 'black',
     white: '#fff',
     white60: '#ffffff60',
-    gray: '#646464',
+    gray: '#979998',
 
     accent: '#112233',
     green: '#60c5a8',

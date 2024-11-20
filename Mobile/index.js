@@ -1,10 +1,9 @@
-/**
- * @format
- */
+import { AppRegistry } from 'react-native';
+import App from './src/App';
+import { name as appName } from './app.json';
+import { LogBox } from 'react-native';
 
-import {AppRegistry} from 'react-native';
-import SignupForm from './src/components/forms/signup-form/SignupForm';
-import {name as appName} from './app.json';
-import 'react-native-gesture-handler';
+// Vô hiệu hóa tất cả cảnh báo
+LogBox.ignoreAllLogs();
 
-AppRegistry.registerComponent(appName, () => SignupForm);
+AppRegistry.registerComponent(appName, () => App);

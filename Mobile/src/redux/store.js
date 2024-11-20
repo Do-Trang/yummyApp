@@ -1,5 +1,5 @@
 import {configureStore} from '@reduxjs/toolkit';
-import thunk from 'redux-thunk';
+import {thunk} from 'redux-thunk';
 
 import {persistStore, persistReducer} from 'redux-persist';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -15,6 +15,10 @@ const persistedReducer = persistReducer(persistConfig, reducer);
 
 export const store = configureStore({
   reducer: persistedReducer,
-  middleware: [thunk],
+  middleware: (getDefaultMiddleware) =>
+    getDefaultMiddleware({
+      serializableCheck: false,  // Tắt kiểm tra tuần tự hóa
+    }).concat(thunk),
 });
+
 export const persistor = persistStore(store);

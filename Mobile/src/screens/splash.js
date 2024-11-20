@@ -1,27 +1,19 @@
 import React from 'react';
-import {
-    StyleSheet,
-    Text,
-    View,
-    Image
-} from 'react-native';
+import { StyleSheet, Text, View, Image} from 'react-native';
 import colors from '../constants/colors';
 import GlobalStyle from '../styles/GlobalStyle';
 
 function Splash({ navigation }) {
-    
     React.useEffect(() => {
         setTimeout(() => {
-            navigation.replace('AnimTab1');
+            navigation.replace('LoginScreen');
+            // navigation.replace('AnimTab1');
         }, 1000);
     }, []);
 
     return (
         <View style={styles.body}>
-            <Image
-                style={styles.logo}
-                source={require('../../assets/logo1.png')}
-            />
+            <Image style={styles.logo} source={require('../../assets/app.png')}/>
             <Text style={[GlobalStyle.CustomFont, styles.text]}> AnChi </Text>
         </View>
     );

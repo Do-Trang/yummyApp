@@ -8,7 +8,7 @@ import {
   TouchableOpacity,
 } from 'react-native';
 import {connect} from 'react-redux';
-import {SmallFoodCard} from '../components/FoodCard';
+import {SmallFoodCard} from '../components/cards/food-cards/SmallFoodCard';
 
 import GlobalStyle from '../styles/GlobalStyle';
 import CustomButton from '../components/CustomButton';

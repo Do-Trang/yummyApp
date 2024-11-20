@@ -29,7 +29,7 @@ module.exports = {
         allowNull: true,
       },
       dob: {
-        type: Sequelize.DATE,
+        type: Sequelize.DATEONLY,
         allowNull: true,
       },
       avatar_url: {
@@ -52,7 +52,11 @@ module.exports = {
         type: Sequelize.BOOLEAN,
         allowNull: false,
         defaultValue: false,
-      }
+      },
+      description: {
+        type: Sequelize.TEXT,
+        allowNull: true,
+      },
     });
   },
 

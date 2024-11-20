@@ -82,12 +82,12 @@ const login = async (account, password, isEmail) => {
     });
 
     if (!user) {
-        return { success: false, message: 'Invalid credentials.' };
+        return { success: false, message: 'Non-exist user.' };
     }
 
     const isPasswordValid = await bcrypt.compare(password, user.password);
     if (!isPasswordValid) {
-        return { success: false, message: 'Invalid credentials.' };
+        return { success: false, message: 'False password' };
     }
 
     const payload = { userId: user.user_id };
@@ -248,11 +248,15 @@ const logout = async (userId) => {
     };
 };
 
-const resetUserPassword = async (userId, newPassword) => {
-    const user = await User.findOne({ 
-        where: { 
-            user_id: userId 
-        } 
+const resetUserPassword = async (account, newPassword) => {
+    const user = await User.findOne({
+        where: {
+            [Op.or]: [
+                { phone_number: account },
+                { email: account }
+            ]
+        },
+        attributes: ['user_id', 'password'],
     });
 
     if (!user) {
@@ -263,10 +267,15 @@ const resetUserPassword = async (userId, newPassword) => {
 
     await User.update(
         { 
-            password: hashedPassword 
+            password: hashedPassword
         },
         { 
-            where: { user_id: userId } 
+            where: {
+                [Op.or]: [
+                    { phone_number: account },
+                    { email: account }
+                ]
+            }, 
         }
     );
 
@@ -275,7 +284,36 @@ const resetUserPassword = async (userId, newPassword) => {
     };
 };
 
+const changePassword = async (userId, oldPassword, newPassword) => {
+    const user = await User.findOne({
+        where: { user_id: userId },
+        attributes: ['user_id', 'password']
+    });
+
+    if (!user) {
+        return { success: false, message: 'User not found.' };
+    }
+
+    const isOldPasswordValid = await bcrypt.compare(oldPassword, user.password);
+    if (!isOldPasswordValid) {
+        return { success: false, message: 'Old password is incorrect.' };
+    }
+
+    const hashedNewPassword = await bcrypt.hash(newPassword, 10);
+
+    await User.update(
+        { password: hashedNewPassword },
+        { where: { user_id: userId } }
+    );
+
+    return {
+        success: true,
+        message: 'Password has been changed successfully.'
+    };
+};
+
 module.exports = {
+    changePassword,
     signupWithPhoneNumber,
     signupWithEmail,
     login,
