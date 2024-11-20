@@ -31,9 +31,10 @@ import VerificationScreen from './screens/verify';
 import ResetPassword from './screens/resetpassword';
 
 import ProfileDetailScreen from './screens/profile-detail';
-import EditProfileScreen from './screens/edit-profile'
-import ChangePasswordScreen from './screens/changepassword'
+import EditProfileScreen from './screens/edit-profile';
+import ChangePasswordScreen from './screens/changepassword';
 
+import ChatScreen from './screens/chat';
 import GlobalStyle from './styles/GlobalStyle';
 import colors from './constants/colors';
 
@@ -122,6 +123,11 @@ const MenuStack = () => {
         component={ChangePasswordScreen} 
         options={{ headerShown: false }} 
       />
+            <Stack.Screen
+              name="ChatScreen"
+              component={ChatScreen}
+              options={{ headerShown: false }}
+            />
     </Stack.Navigator>
   );
 };
@@ -134,6 +140,7 @@ export function AnimTab1() {
         { route: 'Favorite', label: 'Favorite', type: Icons.Feather, icon: 'heart', component: Favorite, },
         { route: 'Home', label: 'Home', type: Icons.Feather, icon: 'home', component: Home, },
         { route: 'Search', label: 'Search', type: Icons.Feather, icon: 'search', component: Search, },
+        
         // { route: 'Menu', label: 'Menu', type: Icons.Feather, icon: 'menu', component: Menu, },
         { route: 'Menu', label: 'Menu', type: Icons.Feather, icon: 'menu', component: MenuStack, }
     ];
