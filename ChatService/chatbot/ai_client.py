@@ -64,7 +64,7 @@ def main():
         print(f"Chat history: {history}")
         
         # Send a question and get response
-        question = "What is your name?"
+        question = "Có những món phở gì?"
         response = client.get_chat(user_id, session_id, question)
         print(f"Response: {response}")
 
