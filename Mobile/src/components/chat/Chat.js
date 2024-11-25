@@ -1,24 +1,58 @@
-import React, { useState } from 'react';
-import { View, Text, TextInput, TouchableOpacity, FlatList, KeyboardAvoidingView } from 'react-native';
+import React, { useState, useEffect, useRef } from 'react';
+import { View, Text, TextInput, TouchableOpacity, FlatList, KeyboardAvoidingView, Alert } from 'react-native';
 import ChatStyles from './ChatStyle';
 import Icon from 'react-native-vector-icons/Ionicons';
 
 const ChatForm = () => {
     const [messages, setMessages] = useState([]);
     const [inputText, setInputText] = useState('');
+    const [sessionId, setSessionId] = useState(null);
+    const userId = 'user123'; // Example user ID
+    const flatListRef = useRef(); // Reference for FlatList to scroll
 
-    const handleSend = () => {
+    const handleSend = async () => {
         if (inputText.trim() === '') return;
 
-        // Add user's message
         const userMessage = { id: `${Date.now()}_user`, text: inputText, sender: 'user' };
         setMessages((prevMessages) => [...prevMessages, userMessage]);
 
-        // Simulate bot's reply
-        const botMessage = { id: `${Date.now()}_bot`, text: `Echo: ${inputText}`, sender: 'bot' };
-        setTimeout(() => {
-            setMessages((prevMessages) => [...prevMessages, botMessage]);
-        }, 1000);
+        try {
+            let endpoint = 'http://192.168.122.1:5000/chat';
+            let body = {
+                user_id: userId,
+                question: inputText
+            };
+
+            if (!sessionId) {
+                // Initialize a new session
+                endpoint = 'http://192.168.122.1:5000/first-chat';
+            } else {
+                // Use existing session
+                body.session_id = sessionId;
+            }
+
+            const response = await fetch(endpoint, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(body)
+            });
+
+            const result = await response.json();
+
+            if (response.ok) {
+                const botMessage = { id: `${Date.now()}_bot`, text: result.response, sender: 'bot' };
+                setMessages((prevMessages) => [...prevMessages, botMessage]);
+
+                if (!sessionId && result.session_id) {
+                    setSessionId(result.session_id); // Save session ID after first chat
+                }
+            } else {
+                Alert.alert('Error', result.error || 'Failed to get response from chatbot');
+            }
+        } catch (error) {
+            console.error('Error sending message:', error);
+            Alert.alert('Error', 'Failed to send message. Please try again.');
+        }
 
         setInputText('');
     };
@@ -32,6 +66,11 @@ const ChatForm = () => {
         );
     };
 
+    useEffect(() => {
+        // Scroll to the bottom whenever a new message is added
+        flatListRef.current?.scrollToEnd({ animated: true });
+    }, [messages]);
+
     return (
         <KeyboardAvoidingView style={ChatStyles.container} behavior="padding">
             {/* Header */}
@@ -41,11 +80,13 @@ const ChatForm = () => {
 
             {/* Chat Area */}
             <FlatList
+                ref={flatListRef}
                 data={messages}
                 renderItem={renderMessage}
                 keyExtractor={(item) => item.id}
                 style={ChatStyles.chatArea}
-                contentContainerStyle={{ paddingBottom: 10 }}
+                contentContainerStyle={{ paddingBottom: 200 }}
+                keyboardShouldPersistTaps="handled" // Prevent keyboard dismissing on tapping inside the list
             />
 
             {/* Input Area */}
