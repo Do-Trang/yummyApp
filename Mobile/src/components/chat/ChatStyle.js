@@ -50,7 +50,7 @@ const ChatStyles = StyleSheet.create({
         borderTopColor: '#ddd',
         backgroundColor: '#fff',
         position: 'absolute', // Keep it fixed
-        bottom: 80, // Move above the navbar
+        bottom: 10, // Move above the navbar
         left: 0,
         right: 0,
     },
@@ -86,6 +86,13 @@ const ChatStyles = StyleSheet.create({
         color: '#fff',
         fontSize: 16,
         fontWeight: 'bold',
+    },
+    backButton: {
+        position: 'absolute',
+        left: 10,
+        top: '50%',
+        transform: [{ translateY: -10 }],
+        zIndex: 1,
     },
 });
 

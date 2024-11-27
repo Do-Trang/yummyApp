@@ -1,14 +1,18 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { View, Text, TextInput, TouchableOpacity, FlatList, KeyboardAvoidingView, Alert } from 'react-native';
 import ChatStyles from './ChatStyle';
+import {CustomButtonOutline1} from '../CustomButton';
 import Icon from 'react-native-vector-icons/Ionicons';
+import { useNavigation } from '@react-navigation/native';
+import colors from '../../constants/colors';
 
-const ChatForm = () => {
+const ChatForm = (props) => {
     const [messages, setMessages] = useState([]);
     const [inputText, setInputText] = useState('');
     const [sessionId, setSessionId] = useState(null);
-    const userId = 'user123'; // Example user ID
-    const flatListRef = useRef(); // Reference for FlatList to scroll
+    const userId = 'user123';
+    const flatListRef = useRef();
+    const navigation = useNavigation();
 
     const handleSend = async () => {
         if (inputText.trim() === '') return;
@@ -24,10 +28,8 @@ const ChatForm = () => {
             };
 
             if (!sessionId) {
-                // Initialize a new session
                 endpoint = 'http://192.168.122.1:5000/first-chat';
             } else {
-                // Use existing session
                 body.session_id = sessionId;
             }
 
@@ -44,7 +46,7 @@ const ChatForm = () => {
                 setMessages((prevMessages) => [...prevMessages, botMessage]);
 
                 if (!sessionId && result.session_id) {
-                    setSessionId(result.session_id); // Save session ID after first chat
+                    setSessionId(result.session_id);
                 }
             } else {
                 Alert.alert('Error', result.error || 'Failed to get response from chatbot');
@@ -67,7 +69,6 @@ const ChatForm = () => {
     };
 
     useEffect(() => {
-        // Scroll to the bottom whenever a new message is added
         flatListRef.current?.scrollToEnd({ animated: true });
     }, [messages]);
 
@@ -75,6 +76,15 @@ const ChatForm = () => {
         <KeyboardAvoidingView style={ChatStyles.container} behavior="padding">
             {/* Header */}
             <View style={ChatStyles.header}>
+                <CustomButtonOutline1
+                    icon_name="arrow-back"
+                    style={ChatStyles.backButton}
+                    onPress={() => navigation.pop()}
+                    onLongPress={() =>navigation.pop()}
+                    colors={[colors.home1, colors.home2, colors.white]}
+                    type="ionicon"
+                    size={36}
+                />
                 <Text style={ChatStyles.headerText}>Chat with AnchiBot</Text>
             </View>
 
@@ -86,7 +96,7 @@ const ChatForm = () => {
                 keyExtractor={(item) => item.id}
                 style={ChatStyles.chatArea}
                 contentContainerStyle={{ paddingBottom: 200 }}
-                keyboardShouldPersistTaps="handled" // Prevent keyboard dismissing on tapping inside the list
+                keyboardShouldPersistTaps="handled"
             />
 
             {/* Input Area */}
