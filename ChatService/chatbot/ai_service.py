@@ -7,8 +7,8 @@ import genAI
 import uuid
 class AIServicer(ai_service_pb2_grpc.AIServiceServicer):
     def __init__(self):
-        connection_string = "postgresql://postgres:password@localhost:5432"
-        self.session_db = genAI.SessionDB(f"{connection_string}/session_db")
+        connection_string = "postgresql://postgres:1@localhost:5432"
+        # self.session_db = genAI.SessionDB(f"{connection_string}/session_db")
         embedding_db = genAI.EmbeddingDB(f"{connection_string}/vector_db")
         self.idx =  embedding_db.load_index()
         self.chatbot = genAI.ChatBot(self.idx)
@@ -25,23 +25,16 @@ class AIServicer(ai_service_pb2_grpc.AIServiceServicer):
             context.set_details(str(e))
             raise
     def GetChat(self, request, context):
-        """"
-        user_id: str,session_id: str, question: str
-        """
         try:
             user_id = request.user_id
             session_id = request.session_id
             question = request.question
-            # get all history from database from user_id and session_id
-            history = self.session_db.get_history(user_id, session_id)
-            print(history)
-            # call request LLM 
-            response = self.chatbot.get_response(question=question, history=history)
 
-            self.session_db.add_history(user_id, session_id, role='user', text=question)
-            self.session_db.add_history(user_id, session_id, role='model', text=response)
+            # Get response from the chatbot without using history or saving to DB
+            response = self.chatbot.get_response(question=question, history=[])
+
+            # Return the response directly without saving to DB
             return ai_service_pb2.GetChatResponse(response=response)
-        
         except Exception as e:
             context.set_code(grpc.StatusCode.INTERNAL)
             context.set_details(str(e))
@@ -69,15 +62,21 @@ class AIServicer(ai_service_pb2_grpc.AIServiceServicer):
             context.set_code(grpc.StatusCode.ABORTED)
             context.set_details(str(e))
             raise
+
+#trnag
     def FirstChat(self, request, context):
         try:
             user_id = request.user_id
-            random_session_id = uuid.uuid4()
             question = request.question
-            session_id = self.session_db.add_session(user_id,random_session_id)
-            response = self.chatbot.get_response(idx=self.idx, question=question, history=[])
-            self.session_db.add_history(user_id, session_id, role='user', text=question)
-            self.session_db.add_history(user_id, session_id, role='model', text=response)
+
+            # Just use a random session_id (not saving it to DB)
+            random_session_id = str(uuid.uuid4())  # Random session ID for the chat
+            print(f"Generated session ID: {random_session_id}")  # Debugging print
+
+            # Get response from the chatbot without saving the session
+            response = self.chatbot.get_response(question=question, history=[])
+
+            # Return the response directly without saving to DB
             return ai_service_pb2.FirstChatResponse(response=response)
         except Exception as e:
             context.set_code(grpc.StatusCode.INTERNAL)

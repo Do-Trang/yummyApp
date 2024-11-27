@@ -12,7 +12,7 @@ import {
 import LinearGradient from 'react-native-linear-gradient';
 import {connect} from 'react-redux';
 
-import {CustomButtonOutline} from '../components/CustomButton';
+import {CustomButtonOutline1} from '../components/CustomButton';
 import {DislikeDialog, LikeDialog} from '../components/CustomDialog';
 import GlobalStyle from '../styles/GlobalStyle';
 import {CardImageFallback} from '../components/CardImageFallback';
@@ -175,8 +175,8 @@ function Detail(props) {
 
   return (
     <SafeAreaView style={GlobalStyle.content}>
-      <CustomButtonOutline
-        icon_name="md-arrow-back-sharp"
+      <CustomButtonOutline1
+        icon_name="arrow-back"
         style={styles.typeIcon}
         onPress={() => {
           props.navigation.pop();
@@ -195,8 +195,8 @@ function Detail(props) {
           start={{x: 0, y: 0}}
           end={{x: 0, y: 0.5}}
           style={styles.linearGradient}>
-          <CustomButtonOutline
-            icon_name="md-close"
+          <CustomButtonOutline1
+            icon_name="close-outline"
             type="ionicon"
             colors={[colors.dislike2, colors.dislike1, colors.white]}
             size={36}
@@ -210,8 +210,8 @@ function Detail(props) {
             }}
             onLongPress={() => setDislike(true)}
           />
-          <CustomButtonOutline
-            icon_name="ios-heart"
+          <CustomButtonOutline1
+            icon_name="heart"
             type="ionicon"
             colors={[colors.like1, colors.like2, colors.white]}
             size={36}

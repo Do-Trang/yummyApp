@@ -4,6 +4,7 @@ import {connect} from 'react-redux';
 
 import GlobalStyle from '../styles/GlobalStyle';
 import CustomButton, {CustomButtonOutline} from '../components/CustomButton';
+import {CustomButtonOutline1} from '../components/CustomButton';
 import {Icons} from '../components/icons';
 import CustomDialog, {
   DislikeDialog,
@@ -77,19 +78,16 @@ function Home(props) {
       )}
 
       <View style={styles.bottomTab}>
-        <CustomButtonOutline
-          icon_name="md-close"
+        <CustomButtonOutline1
+          icon_name="close-outline"
           type="ionicon"
           colors={[colors.dislike2, colors.dislike1, colors.white]}
           size={36}
           onLongPress={() => setDislike(true)}
-          onPress={() => {
-            nextRandomItem();
-          }}
-          onOK={() => setDislike(false)}
+          onPress={nextRandomItem}
         />
-        <CustomButtonOutline
-          icon_name="ios-heart"
+        <CustomButtonOutline1
+          icon_name="heart"
           type="ionicon"
           colors={[colors.like1, colors.like2, colors.white]}
           size={36}
