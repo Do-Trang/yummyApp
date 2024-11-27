@@ -1,10 +1,5 @@
-import React from 'react';
-import {
-  View,
-  TouchableOpacity,
-  StyleSheet,
-  Text,
-} from 'react-native';
+import React, {useState, useEffect, useRef} from 'react';
+import {View, TouchableOpacity, StyleSheet, Text} from 'react-native';
 import LinearGradient from 'react-native-linear-gradient';
 
 import GlobalStyle from '../styles/GlobalStyle';
@@ -12,6 +7,7 @@ import Icon from './icons';
 // import { Icon as GIcon } from 'react-native-gradient-icon';
 import * as Animatable from 'react-native-animatable';
 import colors from '../constants/colors';
+import Ionicons from 'react-native-vector-icons/Ionicons';
 
 export default function CustomButton(props) {
   return (
@@ -20,8 +16,8 @@ export default function CustomButton(props) {
       onPress={props.onPress}>
       <LinearGradient
         colors={[props.colors[0], props.colors[1]]}
-        start={{ x: 1, y: 0 }}
-        end={{ x: 0, y: 1 }}
+        start={{x: 1, y: 0}}
+        end={{x: 0, y: 1}}
         style={styles.linearGradient}>
         <Icon
           type={props.type}
@@ -35,20 +31,19 @@ export default function CustomButton(props) {
 }
 
 export function CustomButtonOutline(props) {
-  const [holding, setHolding] = React.useState(false);
-  const view1Ref = React.useRef(null);
-  const view2Ref = React.useRef(null);
+  const [holding, setHolding] = useState(false);
+  const view1Ref = useRef(null);
+  const view2Ref = useRef(null);
 
-  React.useEffect(() => {
+  useEffect(() => {
     if (holding) {
-      view1Ref.current.transitionTo({ scale: 1.2 });
-      view2Ref.current.transitionTo({ scale: 1.6 });
+      view1Ref.current?.transitionTo({scale: 1.2});
+      view2Ref.current?.transitionTo({scale: 1.6});
     } else {
-      view1Ref.current.transitionTo({ scale: 1 });
-      view2Ref.current.transitionTo({ scale: 1 });
+      view1Ref.current?.transitionTo({scale: 1});
+      view2Ref.current?.transitionTo({scale: 1});
     }
   }, [holding]);
-
 
   return (
     <TouchableOpacity
@@ -56,40 +51,28 @@ export function CustomButtonOutline(props) {
       onPress={props.onPress}
       onPressIn={() => setHolding(true)}
       onPressOut={() => setHolding(false)}
-      onLongPress={() => {
-        props.onLongPress();
-      }}
-      delayLongPress={1500}
-    >
+      onLongPress={props.onLongPress}
+      delayLongPress={1500}>
       <Animatable.View
         ref={view1Ref}
         duration={1000}
-        backgroundColor={props.colors[2]}
-        style={styles.linearGradientOutline}
-      >
+        style={[
+          styles.linearGradientOutline,
+          {backgroundColor: props.colors[2]},
+        ]}>
         <LinearGradient
           colors={[props.colors[0], props.colors[1]]}
-          start={{ x: 1, y: 0 }}
-          end={{ x: 0, y: 1 }}
-          style={styles.linearGradient}
-        >
+          start={{x: 1, y: 0}}
+          end={{x: 0, y: 1}}
+          style={styles.linearGradient}>
           <Animatable.View
             ref={view2Ref}
             duration={1000}
-            backgroundColor={props.colors[2]}
-            style={styles.linearGradientOutline}
-          >
-            {/* <GIcon
-              size={props.size ? props.size : 26}
-              style={{}}
-              colors={[
-                { color: props.colors[0], offset: "0", opacity: "1" },
-                { color: props.colors[1], offset: "1", opacity: "1" },
-              ]}
-              start={{ x: 1, y: 0 }}
-              end={{ x: 0, y: 1 }}
-              name={props.icon_name} type={props.type}
-            /> */}
+            style={[
+              styles.linearGradientOutline,
+              {backgroundColor: props.colors[2]},
+            ]}>
+            {props.icon}
           </Animatable.View>
         </LinearGradient>
       </Animatable.View>
@@ -102,14 +85,21 @@ export function CustomButtonText(props) {
     <TouchableOpacity
       style={[props.style]}
       onPress={props.onPress}
-      disabled={props.disabled}
-    >
+      disabled={props.disabled}>
       <LinearGradient
-        colors={!props.disabled ? [props.colors[0], props.colors[1]] : [props.colors[2], props.colors[3]]}
-        start={{ x: 1, y: 0 }}
-        end={{ x: 0, y: 1 }}
-        style={[styles.linearGradientText, { width: '100%', padding: props.padding, }]}>
-        <Text style={[GlobalStyle.CustomFontBold, styles.text, props.textStyle,]}>
+        colors={
+          !props.disabled
+            ? [props.colors[0], props.colors[1]]
+            : [props.colors[2], props.colors[3]]
+        }
+        start={{x: 1, y: 0}}
+        end={{x: 0, y: 1}}
+        style={[
+          styles.linearGradientText,
+          {width: '100%', padding: props.padding},
+        ]}>
+        <Text
+          style={[GlobalStyle.CustomFontBold, styles.text, props.textStyle]}>
           {props.content}
         </Text>
       </LinearGradient>
@@ -117,11 +107,32 @@ export function CustomButtonText(props) {
   );
 }
 
+//trang
+export function CustomButtonOutline1(props) {
+  return (
+    <TouchableOpacity
+      style={[styles.touch, props.style]}
+      onPress={props.onPress}
+      onLongPress={props.onLongPress}>
+      <LinearGradient
+        colors={[props.colors[0], props.colors[1]]}
+        start={{x: 1, y: 0}}
+        end={{x: 0, y: 1}}
+        style={styles.linearGradient}>
+        <Ionicons
+          name={props.icon_name}
+          size={props.size || 26}
+          color={colors.white}
+        />
+      </LinearGradient>
+    </TouchableOpacity>
+  );
+}
 
 var styles = StyleSheet.create({
   text: {
     fontSize: 16,
-    color: colors.white
+    color: colors.white,
   },
   linearGradient: {
     height: 60,
