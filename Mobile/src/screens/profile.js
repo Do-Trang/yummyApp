@@ -104,6 +104,12 @@ function ProfileScreen({ navigation }) {
                 <TouchableOpacity onPress={toggleListVisibility} style={styles.button}>
                     <Icon name="settings" size={30} color="white" />
                 </TouchableOpacity>
+
+        {/* Nút Chat */}
+        <TouchableOpacity
+          onPress={() => navigation.navigate('ChatScreen')}>
+          <Icon name="chatbubble-ellipses" size={30} color="white" />
+        </TouchableOpacity>
                 <TouchableOpacity style={styles.button} onPress={
                     () => navigation.navigate('EditProfileScreen', 
                         { 

@@ -1,18 +1,16 @@
+import {NavigationContainer} from '@react-navigation/native';
+import {Provider as PaperProvider} from 'react-native-paper';
 
-import { NavigationContainer } from '@react-navigation/native';
-import { Provider as PaperProvider } from 'react-native-paper';
-import 'react-native-gesture-handler';
-
-import { createStackNavigator } from '@react-navigation/stack';
-import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
-import React, { useEffect, useRef } from 'react';
-import { TouchableOpacity, View } from 'react-native';
-import Icon, { Icons } from './components/icons';
+import {createStackNavigator} from '@react-navigation/stack';
+import {createBottomTabNavigator} from '@react-navigation/bottom-tabs';
+import React, {useEffect, useRef} from 'react';
+import {TouchableOpacity, View} from 'react-native';
+import Icon, {Icons} from './components/icons';
 import Colors from './constants/colors';
 import LinearGradient from 'react-native-linear-gradient';
-import { Provider } from 'react-redux';
-import { store, persistor } from './redux/store';
-import { PersistGate } from 'redux-persist/integration/react';
+import {Provider} from 'react-redux';
+import {store, persistor} from './redux/store';
+import {PersistGate} from 'redux-persist/integration/react';
 
 import * as Animatable from 'react-native-animatable';
 
@@ -32,14 +30,15 @@ import VerificationScreen from './screens/verify';
 import ResetPassword from './screens/resetpassword';
 
 import ProfileDetailScreen from './screens/profile-detail';
-import EditProfileScreen from './screens/edit-profile'
-import ChangePasswordScreen from './screens/changepassword'
+import EditProfileScreen from './screens/edit-profile';
+import ChangePasswordScreen from './screens/changepassword';
 
+import ChatScreen from './screens/chat';
 import GlobalStyle from './styles/GlobalStyle';
 import colors from './constants/colors';
 
-import { connect } from 'react-redux';
-import { styles, theme, darkTheme } from './AppStyles';
+import {connect} from 'react-redux';
+import {styles, theme, darkTheme} from './AppStyles';
 
 // Tap buttons
 const TabButton = props => {
@@ -175,6 +174,7 @@ const app = (props) => {
                     <RootStack.Screen name="RecoveryScreen" component={RecoveryScreen} />
                     <RootStack.Screen name="VerifyScreen" component={VerificationScreen} />
                     <RootStack.Screen name="ResetPasswordScreen" component={ResetPassword} />
+                     <RootStack.Screen name="ChatScreen" component={ChatScreen} />
                 </RootStack.Navigator>
             </NavigationContainer>
         </PaperProvider>
