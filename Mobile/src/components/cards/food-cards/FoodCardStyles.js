@@ -4,8 +4,8 @@ import colors from '../../../constants/colors';
 const foodCardStyles = StyleSheet.create({
   detailView: {
     flex: 1,
-    backgroundColor: colors.gray,
-    padding: 16,
+    backgroundColor: colors.white,
+    // padding: 16,
   },
   content: {
     flexDirection: 'column',
@@ -37,12 +37,17 @@ const foodCardStyles = StyleSheet.create({
     borderWidth: 2,
     marginVertical: 10,
     elevation: 2,
-    backgroundColor: colors.white,
+    backgroundColor: colors.light,
     borderRadius: 12,
   },
   smallCardImage: {
     borderTopLeftRadius: 10,
     borderBottomLeftRadius: 10,
+  },
+  username: {
+    marginTop: 5,
+    marginLeft: 10,
+    color: colors.home2,
   },
 });
 
