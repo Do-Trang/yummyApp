@@ -3,7 +3,8 @@ import { View, Text, TextInput, TouchableOpacity, Image, StyleSheet, KeyboardAvo
 import VerifyFormStyles from './VerifyFormStyles';
 import Snackbar from "react-native-snackbar";
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import {IP, PORT} from '@env'
+//import {IP, PORT} from '@env'
+import {IP, PORT} from '../../../utils/axios';
 import client from '../../../utils/axios'
 
 const VerificationForm = (props) => {

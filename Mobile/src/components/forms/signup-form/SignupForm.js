@@ -6,7 +6,8 @@ import Svg, { Path } from "react-native-svg";
 import Icon from "react-native-vector-icons/Ionicons";
 import SegmentedControl from "@react-native-community/segmented-control";
 import SignupFormStyles from "./SignupFormStyles";
-import {IP, PORT} from '@env'
+//import {IP, PORT} from '@env'
+import {IP, PORT} from '../../../utils/axios';
 import client from '../../../utils/axios'
 
 const validateEmail = (email) => {

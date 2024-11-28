@@ -8,7 +8,8 @@ import Icon from "react-native-vector-icons/Ionicons";
 import CheckBox from "@react-native-community/checkbox";
 import LoginFormStyles from "./LoginFormStyles";
 import Snackbar from "react-native-snackbar";
-import {IP, PORT} from '@env'
+// import {IP, PORT} from '@env'
+import {IP, PORT} from '../../../utils/axios';
 import client from '../../../utils/axios'
 
 const validateEmail = (email) => {

@@ -49,14 +49,35 @@ class SessionDB:
                     CONSTRAINT unique_user_session UNIQUE (user_id, session_id)
                 )
             """)
+
+#trang
     def add_session(self, user_id: str, session_id: str):
         """Create new session only if it doesn't exist"""
-        with self.conn.cursor() as cur:
-            cur.execute("""
-                INSERT INTO sessions (user_id, session_id)
-                VALUES (%s, %s)
-                ON CONFLICT (user_id, session_id) DO NOTHING
-            """, (user_id, session_id))
+        if session_id is None:
+            raise ValueError("Session ID cannot be None")  # Raise error if session_id is None
+
+        print(f"Inserting session for user {user_id} with session_id {session_id}")  # Debugging print
+        
+        try:
+            with self.conn.cursor() as cur:
+                cur.execute("""
+                    INSERT INTO sessions (user_id, session_id)
+                    VALUES (%s, %s)
+                    ON CONFLICT (user_id, session_id) DO NOTHING
+                """, (user_id, session_id))
+                
+                # Check if the session was inserted or skipped
+                if cur.rowcount == 0:
+                    print(f"Session for user {user_id} with session_id {session_id} already exists.")
+                else:
+                    print(f"Session for user {user_id} with session_id {session_id} inserted successfully.")
+            
+            self.conn.commit()  # Ensure the transaction is committed to the DB
+        except Exception as e:
+            print(f"Error inserting session for user {user_id}: {e}")
+            self.conn.rollback()  # Rollback the transaction if an error occurs
+            raise  # Reraise the exception if needed
+
 
     def add_history(self,user_id: str, session_id: str, role: str, text: str):
         """Add new history entry to session"""
@@ -325,7 +346,7 @@ def drop_database(connection_string):
         cur.execute("DROP DATABASE IF EXISTS session_db")
 
 
-connection_string = "postgresql://postgres:password@localhost:5432"
+connection_string = "postgresql://postgres:1@localhost:5432"
 drop_database(connection_string)
 create_database(connection_string)
 sessionDB = SessionDB(f"{connection_string}/session_db")
@@ -333,5 +354,4 @@ sessionDB.create_tables()
 embeddingDB = EmbeddingDB(f"{connection_string}/vector_db")
 change_json_format()
 embeddingDB.embedding()
-
 

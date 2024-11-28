@@ -5,7 +5,8 @@ import Svg, { Path } from "react-native-svg";
 import Snackbar from "react-native-snackbar";
 import ResetPasswordStyles from "./ResetPasswordFormStyles";
 import Icon from "react-native-vector-icons/Ionicons";
-import {IP, PORT} from '@env'
+//import {IP, PORT} from '@env'
+import {IP, PORT} from '../../../utils/axios';
 import client from '../../../utils/axios'
 
 const isValidPassword = (password) => {
