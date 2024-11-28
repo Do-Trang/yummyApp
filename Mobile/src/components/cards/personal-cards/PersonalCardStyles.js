@@ -60,6 +60,7 @@ const styles = StyleSheet.create({
     flexDirection: 'column',
     alignItems: 'flex-start',
     marginBottom: 15,
+    marginTop: 10,
   },
   iconLabelContainer: {
     flexDirection: 'row',

@@ -12,6 +12,10 @@ module.exports = (sequelize, DataTypes) => {
      */
     static associate(models) {
       // define association here
+      Restaurant.belongsTo(models.User, {
+        foreignKey: 'user_id',
+        as: 'user'
+      });
     }
   }
 
@@ -20,6 +24,10 @@ module.exports = (sequelize, DataTypes) => {
       type: DataTypes.INTEGER,
       primaryKey: true,
       autoIncrement: true,
+      allowNull: false,
+    },
+    user_id: {
+      type: DataTypes.INTEGER,
       allowNull: false,
     },
     name: {

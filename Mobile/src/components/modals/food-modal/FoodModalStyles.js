@@ -6,10 +6,6 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
   },
-  triggerText: {
-    fontSize: 18,
-    color: 'blue',
-  },
   modalOverlay: {
     flex: 1,
     justifyContent: 'flex-end',
@@ -59,6 +55,7 @@ const styles = StyleSheet.create({
     borderBottomWidth: 0.2,
     borderBottomColor: 'EEEEEE',
     paddingTop: 10,
+    flexDirection: 'column',
   },
 });
 

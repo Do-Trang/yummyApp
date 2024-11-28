@@ -10,25 +10,15 @@ import LinearGradient from 'react-native-linear-gradient';
 import GlobalStyle from '../styles/GlobalStyle';
 import Icon from './icons';
 // import { Icon as GIcon } from 'react-native-gradient-icon';
+
 import * as Animatable from 'react-native-animatable';
 import colors from '../constants/colors';
 
 export default function CustomButton(props) {
   return (
-    <TouchableOpacity
-      style={[styles.touch, props.style]}
-      onPress={props.onPress}>
-      <LinearGradient
-        colors={[props.colors[0], props.colors[1]]}
-        start={{ x: 1, y: 0 }}
-        end={{ x: 0, y: 1 }}
-        style={styles.linearGradient}>
-        <Icon
-          type={props.type}
-          name={props.icon_name}
-          color={colors.white}
-          size={props.size ? props.size : 26}
-        />
+    <TouchableOpacity style={[styles.touch, props.style]} onPress={props.onPress}>
+      <LinearGradient colors={[props.colors[0], props.colors[1]]} start={{ x: 1, y: 0 }} end={{ x: 0, y: 1 }} style={styles.linearGradient}>
+        <Icon type={props.type} name={props.icon_name} color={colors.white} size={props.size ? props.size : 26}/>
       </LinearGradient>
     </TouchableOpacity>
   );
@@ -51,34 +41,15 @@ export function CustomButtonOutline(props) {
 
 
   return (
-    <TouchableOpacity
-      style={[styles.touch, props.style]}
-      onPress={props.onPress}
+    <TouchableOpacity style={[styles.touch, props.style]} onPress={props.onPress}
       onPressIn={() => setHolding(true)}
       onPressOut={() => setHolding(false)}
-      onLongPress={() => {
-        props.onLongPress();
-      }}
+      onLongPress={() => {props.onLongPress();}}
       delayLongPress={1500}
     >
-      <Animatable.View
-        ref={view1Ref}
-        duration={1000}
-        backgroundColor={props.colors[2]}
-        style={styles.linearGradientOutline}
-      >
-        <LinearGradient
-          colors={[props.colors[0], props.colors[1]]}
-          start={{ x: 1, y: 0 }}
-          end={{ x: 0, y: 1 }}
-          style={styles.linearGradient}
-        >
-          <Animatable.View
-            ref={view2Ref}
-            duration={1000}
-            backgroundColor={props.colors[2]}
-            style={styles.linearGradientOutline}
-          >
+      <Animatable.View ref={view1Ref} duration={1000} backgroundColor={props.colors[2]} style={styles.linearGradientOutline}>
+        <LinearGradient colors={[props.colors[0], props.colors[1]]} start={{ x: 1, y: 0 }} end={{ x: 0, y: 1 }} style={styles.linearGradient}>
+          <Animatable.View ref={view2Ref} duration={1000} backgroundColor={props.colors[2]} style={styles.linearGradientOutline}>
             {/* <GIcon
               size={props.size ? props.size : 26}
               style={{}}

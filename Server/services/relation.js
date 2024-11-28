@@ -112,7 +112,7 @@ const getFollowers = async (userId) => {
         }
 
         const followerDetails = followers.map(follow => ({
-            id: follow.follower.id,
+            id: follow.follower.user_id,
             username: follow.follower.username,
             avatar_url: follow.follower.avatar_url
         }));
@@ -146,7 +146,7 @@ const getFollowings = async (userId) => {
         }
 
         const followingDetails = followings.map(follow => ({
-            id: follow.followed.id,
+            id: follow.followed.user_id,
             username: follow.followed.username,
             avatar_url: follow.followed.avatar_url
         }));

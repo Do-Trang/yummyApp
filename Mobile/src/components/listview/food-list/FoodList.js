@@ -11,7 +11,7 @@ const FoodList = ({ selectedButton, listData, onDeleteItem }) => {
     }, [selectedButton, listData]);
 
     const handleDeleteItem = async (itemId) => {
-        client.delete('/swiped-foods/itemId')
+        client.delete(`/swiped-foods/${itemId}`)
             .then((response) => {
                 if(response.status == 200) {
                     const updatedData = data.filter((item) => item.id !== itemId);
@@ -19,7 +19,7 @@ const FoodList = ({ selectedButton, listData, onDeleteItem }) => {
                     onDeleteItem(selectedButton);
                 }
             })
-            .catch((error) => {
+            .catch((error) => {1
                 console.error("Error deleting item:", error);
             });
     };
@@ -38,7 +38,6 @@ const FoodList = ({ selectedButton, listData, onDeleteItem }) => {
                             name={item.name}
                             image_url={item.image_url}
                             onDelete={() => handleDeleteItem(item.id)}
-                            selectedButton={selectedButton}
                         />
                     )}
                 />

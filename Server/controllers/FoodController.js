@@ -3,7 +3,8 @@ const {
     addFood, 
     deleteFood, 
     updateFood,
-    getMyFood 
+    getMyFood,
+    getFoodById 
 } = require('../services/food');
 
 class FoodController {
@@ -123,6 +124,28 @@ class FoodController {
         }
     }
 
+    // @route [GET] /foods/:foodId
+    // @desc Get a food item by ID
+    // @access Private
+    async getFoodById(req, res) {
+        const { foodId } = req.params;
+
+        try {
+            const result = await getFoodById(foodId);
+
+            if (!result.success) {
+                return res.status(404).json({ message: result.message });
+            }
+
+            return res.status(200).json({
+                message: result.message,
+                food: result.food
+            });
+        } catch (error) {
+            console.error('Error in getFoodById:', error);
+            return res.status(500).json({ message: 'Internal server error' });
+        }
+    }
 }
 
 module.exports = new FoodController();

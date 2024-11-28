@@ -39,7 +39,7 @@ const UserList = ({ selectedButton, listData, onDeleteItem }) => {
                     keyExtractor={(item) => item.id}
                     renderItem={({ item }) => (
                         <UserListItem
-                            name={item.name}
+                            username={item.username}
                             id={item.id}
                             avatar_url={item.avatar_url}
                             onDelete={() => handleDeleteItem(item.id)}

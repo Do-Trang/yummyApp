@@ -18,8 +18,8 @@ const getMyProfile = async (userId) => {
     ] = await Promise.all([
         Follow.count({ where: { followed_id: userId } }),
         Follow.count({ where: { follower_id: userId } }),
-        SwipedFood.count({ where: { user_id: userId } }),
-        SwipedRestaurant.count({ where: { user_id: userId } })
+        SwipedFood.count({ where: { user_id: userId, swipe_direction: 'right' } }),
+        SwipedRestaurant.count({ where: { user_id: userId, swipe_direction: 'right' } })
     ]);
 
     return {
@@ -101,38 +101,23 @@ const changePassword = async (userId, oldPassword, newPassword) => {
 
 const getUserProfile = async (currentUserId, userId) => {
     const user = await User.findByPk(userId, {
-        attributes: ['user_id', 'username', 'email', 'phone_number', 'dob', 'avatar_url', 'gender', 'address', 'last_login']
+        attributes: ['user_id', 'username', 'email', 'phone_number', 'dob', 'avatar_url', 'gender', 'address', 'last_login', 'description']
     });
 
     if (!user) {
         return { success: false, message: 'User not found.' };
     }
 
-    const [
-        followersCount,
-        followingCount,
-        swipedFoodsCount,
-        swipedRestaurantsCount,
-        isFollowingCount,
-        isFollowedByCount
-    ] = await Promise.all([
-        Follow.count({ where: { followed_id: userId } }),
-        Follow.count({ where: { follower_id: userId } }),
-        SwipedFood.count({ where: { user_id: userId } }),
-        SwipedRestaurant.count({ where: { user_id: userId } }),
+    const [isFollowingCount, isFollowedByCount] = await Promise.all([
         Follow.count({ where: { follower_id: currentUserId, followed_id: userId } }),
         Follow.count({ where: { follower_id: userId, followed_id: currentUserId } })
     ]);
 
     let followStatus = '';
-    if (isFollowingCount > 0 && isFollowedByCount > 0) {
-        followStatus = 'followed';
-    } else if (isFollowingCount > 0) {
+    if (isFollowingCount > 0) {
         followStatus = 'follow';
-    } else if (isFollowedByCount > 0) {
-        followStatus = 'follow back';
     } else {
-        followStatus = 'follow';
+        followStatus = 'not follow';
     }
 
     return {
@@ -140,13 +125,16 @@ const getUserProfile = async (currentUserId, userId) => {
         message: 'Get user profile successfully!',
         user: {
             ...user.toJSON(),
-            followStatus,
-            followersCount,
-            followingCount,
-            swipedFoodsCount,
-            swipedRestaurantsCount
+            followStatus
         }
     };
+};
+
+module.exports = {
+    getMyProfile,
+    editUserProfile,
+    changePassword,
+    getUserProfile
 };
 
 module.exports = {

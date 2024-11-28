@@ -1,23 +1,13 @@
-import React, {useState} from 'react';
-import {View, StyleSheet} from 'react-native';
-import {connect} from 'react-redux';
+import React, { useState, useEffect } from 'react';
+import { View, StyleSheet } from 'react-native';
 
 import GlobalStyle from '../styles/GlobalStyle';
-import CustomButton, {CustomButtonOutline} from '../components/CustomButton';
-import {Icons} from '../components/icons';
-import CustomDialog, {
-  DislikeDialog,
-  LikeDialog,
-} from '../components/CustomDialog';
-import FoodCard from '../components/FoodCard';
-import RestaurantCard from '../components/RestaurantCard';
+import CustomButton, { CustomButtonOutline } from '../components/CustomButton';
+import { Icons } from '../components/icons';
+import BigFoodCard from '../components/cards/food-cards/BigFoodCard';
+import BigRestaurantCard from '../components/cards/restaurant-cards/BigRestaurantCard';
 import colors from '../constants/colors';
-import {
-  addFoodToFavorite,
-  addRestaurantToFavorite,
-  addFoodToBlacklist,
-  addRestaurantToBlacklist,
-} from '../redux/actions';
+import client from '../utils/axios';
 
 const randomGen = number => Math.floor(Math.random() * number);
 const randomGenExcept = (number, lastNum) => {
@@ -28,52 +18,161 @@ const randomGenExcept = (number, lastNum) => {
   return Math.floor(nextNum);
 };
 
-function Home(props) {
-  const [seed1, setSeed1] = useState(randomGen(props.foods.data.length));
-  const [seed2, setSeed2] = useState(randomGen(props.restaurants.data.length));
-  const [currentFood, setCurrentFood] = useState(props.foods.data[seed1]);
-  const [currentRestaurant, setCurrentRestaurant] = useState(
-    props.restaurants.data[seed2],
-  );
+function Home() {
+  const [foods, setFoods] = useState([]);
+  const [restaurants, setRestaurants] = useState([]);
+  const [seed1, setSeed1] = useState(0);
+  const [seed2, setSeed2] = useState(0);
+  const [currentFood, setCurrentFood] = useState(null);
+  const [currentRestaurant, setCurrentRestaurant] = useState(null);
   const [type, setType] = useState('food');
-  const [like, setLike] = useState(false);
-  const [dislike, setDislike] = useState(false);
+
+  useEffect(() => {
+    if (type === 'food') {
+      fetchFoods();
+    } else if (type === 'restaurant') {
+      fetchRestaurants();
+    }
+  }, [type]);
+
+  const fetchFoods = () => {
+    client.get('/foods')
+      .then(response => {
+        const data = response.data;
+        console.log(data);
+        setFoods(data);
+        setSeed1(randomGen(data.length));
+        setCurrentFood(data[randomGen(data.length)]);
+      })
+      .catch(error => {
+        console.error('Failed to fetch foods:', error);
+      });
+  };
+
+  const fetchRestaurants = () => {
+    client.get('/restaurants')
+      .then(response => {
+        const data = response.data;
+        console.log(data);
+        setRestaurants(data);
+        setSeed2(randomGen(data.length));
+        setCurrentRestaurant(data[randomGen(data.length)]);
+      })
+      .catch(error => {
+        console.error('Failed to fetch restaurants:', error);
+      });
+  };
+
+  const addToFavorites = (item, itemType) => {
+    if (!item) return;
+  
+    let endpoint = '';
+    let payload = {};
+  
+    if (itemType === 'food') {
+      endpoint = '/swiped-foods';
+      payload = {
+        foodId: item.food_id,
+        swipeDirection: 'right',
+      };
+    } else if (itemType === 'restaurant') {
+      endpoint = '/swiped-restaurants';
+      payload = {
+        restaurantId: item.restaurant_id,
+        swipeDirection: 'right',
+      };
+    }
+  
+    client.post(endpoint, payload)
+      .then(response => {
+        console.log(`${itemType === 'food' ? 'Food' : 'Restaurant'} added to favorites with swipeDirection: right`);
+      })
+      .catch(error => {
+        console.error(`Failed to add ${itemType} to favorites:`, error);
+      });
+  };  
+  
+  const addToBlacklist = (item, itemType) => {
+    if (!item) return;
+  
+    let endpoint = '';
+    let payload = {};
+  
+    if (itemType === 'food') {
+      endpoint = '/swiped-foods';
+      payload = {
+        foodId: item.food_id,
+        swipeDirection: 'left',
+      };
+    } else if (itemType === 'restaurant') {
+      endpoint = '/swiped-restaurants';
+      payload = {
+        restaurantId: item.restaurant_id,
+        swipeDirection: 'left',
+      };
+    }
+  
+    client.post(endpoint, payload)
+      .then(response => {
+        console.log(`${itemType === 'food' ? 'Food' : 'Restaurant'} added to blacklist with swipeDirection: left`);
+      })
+      .catch(error => {
+        console.error(`Failed to add ${itemType} to blacklist:`, error);
+      });
+  };
 
   const nextRandomItem = () => {
     if (type === 'food') {
-      const newSeed = randomGenExcept(props.foods.data.length, seed1);
+      const newSeed = randomGenExcept(foods.length, seed1);
       setSeed1(newSeed);
-      setCurrentFood(props.foods.data[newSeed]);
+      setCurrentFood(foods[newSeed]);
     } else {
-      const newSeed = randomGenExcept(props.restaurants.data.length, seed2);
+      const newSeed = randomGenExcept(restaurants.length, seed2);
       setSeed2(newSeed);
-      setCurrentRestaurant(props.restaurants.data[newSeed]);
+      setCurrentRestaurant(restaurants[newSeed]);
     }
   };
 
   return (
     <View style={[GlobalStyle.content, styles.content]}>
       <CustomButton
-        icon_name={type == 'food' ? 'hamburger' : 'store'}
+        icon_name={type === 'food' ? 'hamburger' : 'store'}
         style={styles.typeIcon}
-        onPress={() => {
-          if (type === 'food') {
-            setType('restaurant');
-          } else {
-            setType('food');
-          }
-        }}
+        onPress={() => setType(type === 'food' ? 'restaurant' : 'food')}
         colors={[colors.home1, colors.home2, colors.white]}
         type={Icons.FontAwesome5}
       />
 
       {type === 'food' ? (
-        <FoodCard navigation={props.navigation} food={currentFood} />
+        currentFood && 
+          <BigFoodCard
+            username={currentFood.username}
+            user_id={currentFood.user_id}
+            name={currentFood.name}
+            tags={currentFood.tags}
+            image_url={currentFood.image_url}
+            description={currentFood.description}
+            price={currentFood.price}
+            food_id={currentFood.food_id}
+            rating={currentFood.rating}
+            restaurantName={currentFood.restaurantName}
+            restaurantAddress={currentFood.restaurantAddress}
+          />
       ) : (
-        <RestaurantCard
-          navigation={props.navigation}
-          restaurant={currentRestaurant}
-        />
+        currentRestaurant && 
+          <BigRestaurantCard
+            username={currentRestaurant.username}
+            user_id={currentRestaurant.user_id}
+            name={currentRestaurant.name}
+            tags={currentRestaurant.tags}
+            image_url={currentRestaurant.image_url}
+            description={currentRestaurant.description}
+            address={currentRestaurant.address}
+            restaurant_id={currentRestaurant.restaurant_id}
+            rating={currentRestaurant.rating}
+            phone_number={currentRestaurant.phone_number}
+            website={currentRestaurant.website}
+          />
       )}
 
       <View style={styles.bottomTab}>
@@ -82,90 +181,25 @@ function Home(props) {
           type="ionicon"
           colors={[colors.dislike2, colors.dislike1, colors.white]}
           size={36}
-          onLongPress={() => setDislike(true)}
           onPress={() => {
+            const item = type === 'food' ? currentFood : currentRestaurant;
+            addToBlacklist(item, type);
             nextRandomItem();
           }}
-          onOK={() => setDislike(false)}
         />
+
         <CustomButtonOutline
           icon_name="ios-heart"
           type="ionicon"
           colors={[colors.like1, colors.like2, colors.white]}
           size={36}
-          onLongPress={() => setLike(true)}
           onPress={() => {
-            if (type === 'food') {
-              props.addFoodToFavorite(currentFood.id);
-            } else {
-              props.addRestaurantToFavorite(currentRestaurant.id);
-            }
-            // props.addFoodToFavorite(type === 'food' ? seed1 : seed2);
+            const item = type === 'food' ? currentFood : currentRestaurant;
+            addToFavorites(item, type);
             nextRandomItem();
           }}
-          onOK={() => setLike(false)}
         />
       </View>
-      {like ? (
-        <LikeDialog
-          open={like}
-          onCancel={() => {
-            setLike(false);
-          }}
-          onOK={() => {
-            if (type === 'food') {
-              props.addFoodToFavorite(currentFood.id);
-              props.navigation.push('Detail', {
-                detail: currentFood,
-                type: 'food',
-              });
-            } else {
-              props.addRestaurantToFavorite(currentRestaurant.id);
-              props.navigation.push('Detail', {
-                detail: currentRestaurant,
-                type: 'restaurant',
-              });
-            }
-            setLike(false);
-          }}
-          content={
-            type === 'food'
-              ? 'Zô, vậy là bạn thích ' +
-                currentFood.title +
-                '. Chần chừ chi mà hông đi ăn thôi nào!'
-              : 'Zô, vậy là bạn thích ' +
-                currentRestaurant.title +
-                '. Chần chừ chi mà hông đi ăn thôi nào!'
-          }
-        />
-      ) : null}
-
-      {dislike ? (
-        <DislikeDialog
-          open={dislike}
-          onCancel={() => {
-            setDislike(false);
-          }}
-          onOK={() => {
-            if (type === 'food') {
-              props.addFoodToBlacklist(currentFood.id);
-            } else {
-              props.addRestaurantToBlacklist(currentRestaurant.id);
-            }
-            nextRandomItem();
-            setDislike(false);
-          }}
-          content={
-            type === 'food'
-              ? 'Zô, vậy là bạn hông thích ' +
-                currentFood.title +
-                '. Vậy để mình thêm vào hố đen nhá!'
-              : 'Zô, vậy là bạn hông thích ' +
-                currentRestaurant.title +
-                '. Vậy để mình thêm vào hố đen nhá!'
-          }
-        />
-      ) : null}
     </View>
   );
 }
@@ -174,9 +208,8 @@ const styles = StyleSheet.create({
   content: {
     flexDirection: 'column',
     justifyContent: 'space-between',
-    paddingBottom: 75, // as 60 for navbar, 15 for spacing
+    paddingBottom: 75,
   },
-
   typeIcon: {
     position: 'absolute',
     top: 18,
@@ -184,42 +217,12 @@ const styles = StyleSheet.create({
     zIndex: 1,
     elevation: 10,
   },
-
-  desc: {
-    overflow: 'hidden',
-    textAlign: 'center',
-  },
-
-  seeMore: {
-    color: colors.gray,
-    textDecorationLine: 'underline',
-  },
-
-  detailView: {
-    width: '100%',
-    height: '50%',
-    // marginTop: '1%',
-    marginBottom: '10%',
-  },
   bottomTab: {
     alignItems: 'center',
     justifyContent: 'space-around',
     flexDirection: 'row',
     width: '100%',
-    // bottom: 80,
   },
 });
 
-const mapStateToProps = state => ({
-  foods: state.filteredFoods,
-  restaurants: state.filteredRestaurants,
-  ingredients: state.ingredients,
-  tags: state.tags,
-});
-
-export default connect(mapStateToProps, {
-  addFoodToFavorite,
-  addRestaurantToFavorite,
-  addFoodToBlacklist,
-  addRestaurantToBlacklist,
-})(Home);
+export default Home;

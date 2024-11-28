@@ -3,7 +3,8 @@ const {
     getRestaurantByCriteria, 
     updateRestaurant, 
     deleteRestaurant,
-    getMyRestaurant
+    getMyRestaurant,
+    getRestaurantById
 } = require('../services/restaurant');
 
 class RestaurantController {
@@ -119,6 +120,29 @@ class RestaurantController {
             });
         } catch (error) {
             console.error('Error in getMyRestaurant:', error);
+            return res.status(500).json({ message: 'Internal server error' });
+        }
+    }
+
+    // @route [GET] /restaurants/:restaurantId
+    // @desc Get a restaurant by its ID
+    // @access Private
+    async getRestaurantById(req, res) {
+        const { restaurantId } = req.params;
+
+        try {
+            const result = await getRestaurantById(restaurantId);
+
+            if (!result.success) {
+                return res.status(404).json({ message: result.message });
+            }
+
+            return res.status(200).json({
+                message: result.message,
+                restaurant: result.restaurant
+            });
+        } catch (error) {
+            console.error('Error in getRestaurantById:', error);
             return res.status(500).json({ message: 'Internal server error' });
         }
     }
