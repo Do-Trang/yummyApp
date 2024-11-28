@@ -1,9 +1,10 @@
 - Sửa biến môi trường (password, name,...)
 
-- Lệnh migrate db
+- Chạy các lệnh sau
 ```
 cd Server
-
+npm install
 npx sequelize-cli db:migrate
+npx sequelize-cli db:seed:all
 ```
 
