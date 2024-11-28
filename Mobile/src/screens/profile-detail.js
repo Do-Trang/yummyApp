@@ -131,6 +131,7 @@ const ProfileDetailScreen = ({ route, navigation }) => {
                 favoriteRestaurantsCount={favoriteRestaurantsCount}
                 selectedButton={selectedButton}
                 onSelectButton={setSelectedButton}
+                navigation = {navigation }
             />
 
             {renderList()}

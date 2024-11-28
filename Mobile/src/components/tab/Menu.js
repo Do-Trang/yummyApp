@@ -3,7 +3,7 @@ import { ScrollView, TouchableOpacity, Text, View } from "react-native";
 import MenuStyles from './MenuStyles';
 import Icon from 'react-native-vector-icons/Ionicons';
 
-const Menu = ({ username, followerCount, followingCount, favoriteFoodsCount, favoriteRestaurantsCount, selectedButton, onSelectButton }) => {
+const Menu = ({ username, followerCount, followingCount, favoriteFoodsCount, favoriteRestaurantsCount, selectedButton, onSelectButton, navigation }) => {
     const scrollViewRef = useRef(null);
 
     const menuData = [
@@ -22,7 +22,7 @@ const Menu = ({ username, followerCount, followingCount, favoriteFoodsCount, fav
     return (
         <View style={MenuStyles.container}>
             <View style={MenuStyles.header}>
-                <TouchableOpacity style={MenuStyles.backButton} onPress={() => console.log("Back pressed")}>
+                <TouchableOpacity style={MenuStyles.backButton} onPress={() => navigation.pop()}>
                     <Icon name="arrow-back" size={35} color="black" />
                 </TouchableOpacity>
                 <Text style={MenuStyles.username}>{username}</Text>
