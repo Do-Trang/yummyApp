@@ -75,7 +75,7 @@ class RelationController {
     // @access Private
     async getFollowers(req, res) {
         const userId = req.user_id;
-        console.log(1)
+        console.log(3)
 
         try {
             const result = await getFollowers(userId);

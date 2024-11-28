@@ -1,4 +1,4 @@
-const { Restaurant, Sequelize } = require('../db/models');
+const { Restaurant, Sequelize, User } = require('../db/models');
 const Op = Sequelize.Op;
 
 const getRestaurantByCriteria = async (name = '', address = '', tags = [], minRating = null) => {
@@ -35,7 +35,14 @@ const getRestaurantByCriteria = async (name = '', address = '', tags = [], minRa
 
     const restaurants = await Restaurant.findAll({
         where: whereConditions,
-        attributes: ['restaurant_id', 'name', 'address', 'phone_number', 'website', 'description', 'image_url', 'rating', 'tags']
+        attributes: ['restaurant_id', 'name', 'address', 'phone_number', 'website', 'description', 'image_url', 'rating', 'tags'],
+        include: [
+            {
+                model: User,
+                as: 'user',
+                attributes: ['user_id', 'username']
+            }
+        ]
     });
 
     if (restaurants.length === 0) {
@@ -45,7 +52,15 @@ const getRestaurantByCriteria = async (name = '', address = '', tags = [], minRa
     return {
         success: true,
         message: 'Restaurants found successfully!',
-        restaurants: restaurants.map(restaurant => restaurant.toJSON())
+        restaurants: restaurants.map(restaurant => {
+            const restaurantData = restaurant.toJSON();
+            if (restaurantData.user) {
+                restaurantData.user_id = restaurantData.user.user_id;
+                restaurantData.username = restaurantData.user.username;
+            }
+
+            return restaurantData;
+        })
     };
 };
 
@@ -158,10 +173,36 @@ const getMyRestaurant = async (userId) => {
     }
 };
 
+const getRestaurantById = async (restaurantId) => {
+    try {
+        const restaurant = await Restaurant.findOne({
+            where: { restaurant_id: restaurantId },
+            attributes: ['restaurant_id', 'name', 'address', 'phone_number', 'website', 'description', 'image_url', 'rating', 'tags']
+        });
+
+        if (!restaurant) {
+            return { success: false, message: 'Restaurant not found.' };
+        }
+
+        const restaurantData = restaurant.toJSON();
+        console.log(restaurantData)
+
+        return {
+            success: true,
+            message: 'Restaurant details retrieved successfully!',
+            restaurant: restaurantData
+        };
+    } catch (error) {
+        console.error('Error in getRestaurantById:', error);
+        return { success: false, message: 'Error retrieving restaurant details.' };
+    }
+}
+
 module.exports = {
     addRestaurant,
     deleteRestaurant,
     getRestaurantByCriteria,
     updateRestaurant,
-    getMyRestaurant
+    getMyRestaurant,
+    getRestaurantById
 }

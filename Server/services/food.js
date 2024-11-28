@@ -1,4 +1,4 @@
-const { Food, Sequelize, Restaurant } = require('../db/models');
+const { Food, Sequelize, Restaurant, User } = require('../db/models');
 const Op = Sequelize.Op;
 
 const getFoodByCriteria = async (name = '', minPrice = null, maxPrice = null, tags = [], minRating = null) => {
@@ -54,7 +54,13 @@ const getFoodByCriteria = async (name = '', minPrice = null, maxPrice = null, ta
         include: [
             {
                 model: Restaurant,
+                as: 'restaurant',
                 attributes: ['name', 'address']
+            },
+            {
+                model: User,
+                as: 'user',
+                attributes: ['user_id', 'username']
             }
         ],
         attributes: ['food_id', 'name', 'description', 'price', 'image_url', 'rating', 'tags']
@@ -69,11 +75,11 @@ const getFoodByCriteria = async (name = '', minPrice = null, maxPrice = null, ta
         message: 'Foods found successfully!',
         food: foods.map(food => {
             const foodData = food.toJSON();
-            if (foodData.rating) {
-                foodData.rating = JSON.parse(foodData.rating);
-            }           
-            foodData.restaurantName = foodData.Restaurant.name;
-            foodData.restaurantAddress = foodData.Restaurant.address;
+            
+            foodData.restaurantName = foodData.restaurant.name;
+            foodData.restaurantAddress = foodData.restaurant.address;
+            foodData.user_id = foodData.user.user_id;
+            foodData.username = foodData.user.username;
             return foodData;
         })
     };
@@ -196,11 +202,47 @@ const getMyFood = async (userId) => {
     }
 };
 
+const getFoodById = async (foodId) => {
+    try {
+        const food = await Food.findOne({
+            where: { food_id: foodId },
+            include: [
+                {
+                    model: Restaurant,
+                    as: 'restaurant',
+                    attributes: ['name', 'address']
+                }
+            ],
+            attributes: ['food_id', 'name', 'description', 'price', 'image_url', 'rating', 'tags']
+        });
+
+        if (!food) {
+            return { success: false, message: 'Food not found.' };
+        }
+
+        const foodData = food.toJSON();
+
+        foodData.restaurantName = foodData.restaurant.name;
+        foodData.restaurantAddress = foodData.restaurant.address;
+        console.log(foodData)
+
+        return {
+            success: true,
+            message: 'Food details retrieved successfully!',
+            food: foodData
+        };
+    } catch (error) {
+        console.error('Error in getFoodById:', error);
+        return { success: false, message: 'Error retrieving food details.' };
+    }
+};
+
 
 module.exports = {
     getFoodByCriteria,
     addFood,
     deleteFood,
     updateFood,
-    getMyFood
+    getMyFood,
+    getFoodById
 };

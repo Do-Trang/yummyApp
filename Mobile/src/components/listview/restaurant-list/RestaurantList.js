@@ -11,7 +11,7 @@ const RestaurantList = ({ selectedButton, listData, onDeleteItem }) => {
     }, [selectedButton, listData]);
 
     const handleDeleteItem = async (itemId) => {
-        client.delete('/swiped-restaurants/${itemId}')
+        client.delete(`/swiped-restaurants/${itemId}`)
             .then((response) => {
                 if(response.status == 200) {
                     const updatedData = data.filter((item) => item.id !== itemId);

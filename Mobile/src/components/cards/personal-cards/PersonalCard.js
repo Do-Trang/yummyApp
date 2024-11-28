@@ -1,33 +1,59 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { View, Text, Image, ScrollView, ImageBackground, SafeAreaView, TouchableOpacity } from 'react-native';
 import Icon from 'react-native-vector-icons/Ionicons';
 import styles from './PersonalCardStyles';
 
-const PersonalCard = (props) => {
-  const { navigation } = props;
+const getAccountIcon = (account) => {
+  const emailPattern = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,4}$/;
+  if (emailPattern.test(account)) {
+    return 'mail';
+  }
+  return 'call';
+};
 
-  const [avatar, setAvatar] = useState(props.avatar_url || '');
-  const [name, setName] = useState(props.username || '');
-  const [dob, setDob] = useState(props.dob || '');
-  const [gender, setGender] = useState(props.gender || '');
-  const [address, setAddress] = useState(props.address || '');
-  const [description, setDescription] = useState(props.description || '');
-  const [followersCount, setFollowersCount] = useState(props.followersCount || 0);
-  const [followingCount, setFollowingCount] = useState(props.followingCount || 0);
-  const [swipedFoodsCount, setSwipedFoodsCount] = useState(props.swipedFoodsCount || 0);
-  const [swipedRestaurantsCount, setSwipedRestaurantsCount] = useState(props.swipedRestaurantsCount || 0);
+const PersonalCard = ({ user_id, username, account, dob, avatar_url, gender, address, description, followersCount, followingCount, swipedFoodsCount, swipedRestaurantsCount, navigation }) => {
+  const [currentfollowersCount, setCurrentFollowersCount] = useState(followersCount || 0);
+  const [currentfollowingCount, setCurrentFollowingCount] = useState(followingCount || 0);
+  const [currentSwipedFoodsCount, setCurrentSwipedFoodsCount] = useState(swipedFoodsCount || 0);
+  const [currentSwipedRestaurantsCount, setCurrentSwipedRestaurantsCount] = useState(swipedRestaurantsCount || 0);
+
+  const decreaseFollowersCount = () => {
+    if (currentfollowersCount > 0) {
+      setCurrentFollowersCount(currentfollowersCount - 1);
+    }
+  };
+
+  const decreaseFollowingCount = () => {
+    if (currentfollowingCount > 0) {
+      setCurrentFollowingCount(currentfollowingCount - 1);
+    }
+  };
+
+  const decreaseSwipedFoodsCount = () => {
+    if (currentSwipedFoodsCount > 0) {
+      setCurrentSwipedFoodsCount(currentSwipedFoodsCount - 1);
+    }
+  };
+
+  const decreaseSwipedRestaurantsCount = () => {
+    if (currentSwipedRestaurantsCount > 0) {
+      setCurrentSwipedRestaurantsCount(currentSwipedRestaurantsCount - 1);
+    }
+  };
 
   const handleNavigate = () => {
     navigation.navigate('ProfileDetailScreen', {
-      followerCount : followersCount,
-      followingCount : followingCount,
-      favoriteFoodsCount : swipedFoodsCount,
-      favoriteRestaurantsCount : swipedRestaurantsCount,
+      username: username,
+      
+      currentfollowersCount : currentfollowersCount,
+      currentfollowingCount : currentfollowingCount,
+      currentSwipedFoodsCount : currentSwipedFoodsCount,
+      currentSwipedRestaurantsCount : currentSwipedRestaurantsCount,
 
-      setFollowersCount: setFollowersCount,
-      setFollowingCount: setFollowingCount,
-      setFavoriteFoodsCount: setSwipedFoodsCount,
-      setFavoriteRestaurantsCount: setSwipedRestaurantsCount,
+      onDecreaseFollowersCount: decreaseFollowersCount,
+      onDecreaseFollowingCount: decreaseFollowingCount,
+      onDecreaseSwipedFoodsCount: decreaseSwipedFoodsCount,
+      onDecreaseSwipedRestaurantsCount: decreaseSwipedRestaurantsCount,
     });
   };
 
@@ -35,25 +61,33 @@ const PersonalCard = (props) => {
     <SafeAreaView style={{ flex: 1 }}>
       <ScrollView contentContainerStyle={styles.container}>
         <View style={styles.profileHeader}>
-          <ImageBackground source={{ uri: avatar }} style={styles.cover} resizeMode="cover">
+          <ImageBackground source={{ uri: avatar_url }} style={styles.cover} resizeMode="cover">
             <View style={styles.overlay} />
           </ImageBackground>
         </View>
 
         <View style={styles.headerContainer}>
           <View style={styles.avatarContainer}>
-            <Image source={{ uri: avatar }} style={styles.avatar} resizeMode="cover" />
+            <Image source={{ uri: avatar_url }} style={styles.avatar} resizeMode="cover" />
           </View>
-          <Text style={styles.name}>{name}</Text>
+          <Text style={styles.name}>{username}</Text>
         </View>
-
+        
         <View style={styles.detailsContainer}>
+          <View style={styles.infoItem}>
+            <View style={styles.iconLabelContainer}>
+              <Icon name={getAccountIcon(account)} size={24} color="gray" style={styles.icon} />
+              <Text style={styles.label}>Account</Text>
+            </View>
+            <Text style={styles.description}>{account}</Text>
+            <View style={styles.divider} />
+          </View>
           <View style={styles.infoItem}>
             <View style={styles.iconLabelContainer}>
               <Icon name="person-outline" size={24} color="gray" style={styles.icon} />
               <Text style={styles.label}>Name</Text>
             </View>
-            <Text style={styles.description}>{name}</Text>
+            <Text style={styles.description}>{username}</Text>
             <View style={styles.divider} />
           </View>
 
@@ -71,7 +105,7 @@ const PersonalCard = (props) => {
               <Icon name="transgender-outline" size={24} color="gray" style={styles.icon} />
               <Text style={styles.label}>Gender</Text>
             </View>
-            <Text style={styles.description}>{gender == true ? 'Male' : 'Female'}</Text>
+            <Text style={styles.description}>{gender === true ? 'Male' : gender === false ? 'Female' : ''}</Text>
             <View style={styles.divider} />
           </View>
 
@@ -100,14 +134,14 @@ const PersonalCard = (props) => {
               style={styles.statItem} 
               onPress={handleNavigate}
             >
-              <Text style={styles.statValue}>{followersCount}</Text>
+              <Text style={styles.statValue}>{currentfollowersCount}</Text>
               <Text style={styles.statLabel}>Followers</Text>
             </TouchableOpacity>
             <TouchableOpacity 
               style={styles.statItem} 
               onPress={handleNavigate}
             >
-              <Text style={styles.statValue}>{followingCount}</Text>
+              <Text style={styles.statValue}>{currentfollowingCount}</Text>
               <Text style={styles.statLabel}>Following</Text>
             </TouchableOpacity>
           </View>
@@ -117,14 +151,14 @@ const PersonalCard = (props) => {
               style={styles.statItem} 
               onPress={handleNavigate}
             >
-              <Text style={styles.statValue}>{swipedFoodsCount}</Text>
+              <Text style={styles.statValue}>{currentSwipedFoodsCount}</Text>
               <Text style={styles.statLabel}>Favourite Foods</Text>
             </TouchableOpacity>
             <TouchableOpacity 
               style={styles.statItem} 
               onPress={handleNavigate}
             >
-              <Text style={styles.statValue}>{swipedRestaurantsCount}</Text>
+              <Text style={styles.statValue}>{currentSwipedRestaurantsCount}</Text>
               <Text style={styles.statLabel}>Favourite Restaurants</Text>
             </TouchableOpacity>
           </View>

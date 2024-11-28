@@ -25,8 +25,8 @@ const getSwipedRestaurants = async (userId) => {
             success: true,
             message: 'Swiped restaurants retrieved successfully!',
             swipedRestaurants: swipedRestaurants.map(swipe => ({
-                name: swipe.restaurantAlias.name,
-                image_url: swipe.restaurantAlias.image_url,
+                name: swipe.restaurant.name,
+                image_url: swipe.restaurant.image_url,
                 id: swipe.restaurant_id,
             })),
         };

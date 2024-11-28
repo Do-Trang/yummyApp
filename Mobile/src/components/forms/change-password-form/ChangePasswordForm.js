@@ -65,7 +65,7 @@ const ChangePasswordForm = (props) => {
         if (isSubmitted) {
             console.log(IP, PORT)
             client.patch(`/auth/change-password`, {
-                oldPassword: oldPassword,
+                currentPassword: oldPassword,
                 newPassword: newPassword,
             })
             .then((response) => {

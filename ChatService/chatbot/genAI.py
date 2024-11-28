@@ -355,4 +355,3 @@ embeddingDB = EmbeddingDB(f"{connection_string}/vector_db")
 change_json_format()
 embeddingDB.embedding()
 
-

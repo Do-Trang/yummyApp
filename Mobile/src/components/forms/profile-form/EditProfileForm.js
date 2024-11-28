@@ -8,26 +8,35 @@ import { launchImageLibrary } from 'react-native-image-picker';
 import storage from '@react-native-firebase/storage';
 import Snackbar from "react-native-snackbar";
 
-const EditProfileForm = (props) => {
-    const { avatar_url, username, address, gender, dob, description, onSave } = props;
+const formatDateToString = (date) => {
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
+};
 
+const EditProfileForm = ({ avatar_url, username, address, gender, dob, description, onSave, navigation }) => {
     const [date, setDate] = useState(new Date(dob));
     const [showCalendar, setShowCalendar] = useState(false);
     const [currentDescription, setDescription] = useState(description || "");
     const [currentUsername, setUsername] = useState(username || "");
     const [currentAddress, setAddress] = useState(address || "");
-    const [currentGender, setGender] = useState(gender || "");
+    const [currentGender, setGender] = useState(gender);
     const [currentAvatar, setAvatar] = useState(avatar_url || null);
     const maxWords = 500;
 
-    useEffect(() => {
-        setUsername(username);
-        setAddress(address);
-        setGender(gender);
-        setDate(new Date(dob));
-        setDescription(description);
-        setAvatar(avatar_url);
-    }, [username, address, gender, dob, description, avatar_url]);
+    const uploadImage = async (uri) => {
+        const fileName = uri.substring(uri.lastIndexOf('/') + 1);
+        const reference = storage().ref(`foods/${fileName}`);
+
+        try {
+            await reference.putFile(uri);
+            const url = await reference.getDownloadURL();
+            console.log('Uploaded image URL:', url);
+        } catch (error) {
+            console.error('Upload failed: ', error);
+        }
+    };
 
     const changeProfilePicture = () => {
         const options = {
@@ -46,19 +55,6 @@ const EditProfileForm = (props) => {
                 await uploadImage(uri);
             }
         });
-    };
-
-    const uploadImage = async (uri) => {
-        const fileName = uri.substring(uri.lastIndexOf('/') + 1);
-        const reference = storage().ref(`foods/${fileName}`);
-
-        try {
-            await reference.putFile(uri);
-            const url = await reference.getDownloadURL();
-            console.log('Uploaded image URL:', url);
-        } catch (error) {
-            console.error('Upload failed: ', error);
-        }
     };
 
     const onChangeDate = (event, selectedDate) => {
@@ -82,31 +78,22 @@ const EditProfileForm = (props) => {
         setAddress(text);
     };
 
-    const formatDateToString = (date) => {
-        const year = date.getFullYear();
-        const month = String(date.getMonth() + 1).padStart(2, '0');
-        const day = String(date.getDate()).padStart(2, '0');
-        return `${year}-${month}-${day}`;
-    };
-
     const handleSave = () => {
-        if (onSave) {
-            onSave({
-                avatar: currentAvatar,
-                username: currentUsername,
-                address: currentAddress,
-                gender: currentGender,
-                dob: formatDateToString(date),
-                description: currentDescription,
-            });
-            props.navigation.goBack();
-            Snackbar.show({
-                text: 'Profile saved successfully!',
-                duration: Snackbar.LENGTH_SHORT,
-                backgroundColor: 'green',
-                textColor: 'white',
-            });
-        }
+        onSave({
+            avatar: currentAvatar,
+            username: currentUsername,
+            address: currentAddress,
+            gender: currentGender,
+            dob: formatDateToString(date),
+            description: currentDescription,
+        });
+        navigation.goBack();
+        Snackbar.show({
+            text: 'Profile saved successfully!',
+            duration: Snackbar.LENGTH_SHORT,
+            backgroundColor: 'green',
+            textColor: 'white',
+        });
     };
 
     return (
@@ -150,20 +137,20 @@ const EditProfileForm = (props) => {
                 <View>
                     <Text style={editProfileFormStyles.label}>Gender</Text>
                     <RadioButton.Group
-                        onValueChange={(newValue) => setGender(newValue === "Male")}
-                        value={gender ? "Male" : "Female"}
+                        onValueChange={(newValue) => setGender(newValue === "Male" ? true : false)}
+                        value={currentGender === true ? "Male" : currentGender === false ? "Female" : ""}
                     >
                         <View style={editProfileFormStyles.radioGroupContainer}>
-                        <View style={editProfileFormStyles.radioOption}>
-                            <RadioButton value="Male" color="blue" uncheckedColor="gray" />
-                            <Text>Male</Text>
-                            <Icon name="male" size={24} color="blue" style={editProfileFormStyles.genderIcon} />
-                        </View>
-                        <View style={editProfileFormStyles.radioOption}>
-                            <RadioButton value="Female" color="pink" uncheckedColor="gray" />
-                            <Text>Female</Text>
-                            <Icon name="female" size={24} color="pink" style={editProfileFormStyles.genderIcon} />
-                        </View>
+                            <View style={editProfileFormStyles.radioOption}>
+                                <RadioButton value="Male" color="blue" uncheckedColor="gray" />
+                                <Text>Male</Text>
+                                <Icon name="male" size={24} color="blue" style={editProfileFormStyles.genderIcon} />
+                            </View>
+                            <View style={editProfileFormStyles.radioOption}>
+                                <RadioButton value="Female" color="pink" uncheckedColor="gray" />
+                                <Text>Female</Text>
+                                <Icon name="female" size={24} color="pink" style={editProfileFormStyles.genderIcon} />
+                            </View>
                         </View>
                     </RadioButton.Group>
                 </View>
@@ -220,7 +207,7 @@ const EditProfileForm = (props) => {
                 <Button
                 title="Save"
                 onPress={handleSave}
-                color="#007BFF" // Tùy chọn để thay đổi màu nền của Button
+                color="#007BFF"
                 />
             </ScrollView>
         </SafeAreaView>

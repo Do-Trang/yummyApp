@@ -1,18 +1,17 @@
 import React, { useState, useEffect } from 'react';
 import EditProfileForm from '../components/forms/profile-form/EditProfileForm';
 
-const EditProfileScreen = (props) => {
-    console.log(props)
+const EditProfileScreen = ({ route, navigation}) => {
     return (
         <EditProfileForm
-            avatar_url={props.route.params.avatar_url}
-            username={props.route.params.username}
-            address={props.route.params.address}
-            gender={props.route.params.gender}
-            dob={props.route.params.dob}
-            description={props.route.params.description}
-            onSave={props.onSave}
-            navigation={props.navigation}
+            avatar_url={route.params.avatar_url}
+            username={route.params.username}
+            address={route.params.address}
+            gender={route.params.gender}
+            dob={route.params.dob}
+            description={route.params.description}
+            onSave={route.params.onSave}
+            navigation={navigation}
         />
     );
 };

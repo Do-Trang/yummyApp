@@ -25,7 +25,7 @@ const getSwipedFoods = async (userId) => {
         message: 'Swiped foods retrieved successfully!',
         swipedFoods: swipedFoods.map(swipe => ({
             name: swipe.food.name,
-            image_url: swipe.Food.image_url,
+            image_url: swipe.food.image_url,
             id: swipe.food_id,
         })),
     };

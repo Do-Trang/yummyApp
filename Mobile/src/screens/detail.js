@@ -12,6 +12,7 @@ import {
 import LinearGradient from 'react-native-linear-gradient';
 import {connect} from 'react-redux';
 
+import {CustomButtonOutline} from '../components/CustomButton';
 import {CustomButtonOutline1} from '../components/CustomButton';
 import {DislikeDialog, LikeDialog} from '../components/CustomDialog';
 import GlobalStyle from '../styles/GlobalStyle';
@@ -175,8 +176,8 @@ function Detail(props) {
 
   return (
     <SafeAreaView style={GlobalStyle.content}>
-      <CustomButtonOutline1
-        icon_name="arrow-back"
+      <CustomButtonOutline
+        icon_name="md-arrow-back-sharp"
         style={styles.typeIcon}
         onPress={() => {
           props.navigation.pop();

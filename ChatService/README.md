@@ -10,6 +10,7 @@ pip install -r requirements.txt
 - sau đó gõ thêm lệnh :< mặc kệ cảnh báo đỏ nhé>
 pip install google-generativeai==0.8.3
 pip install grpcio-tools==1.68.0
+
 pip install flask flask-cors grpcio grpcio-tools
 pip install --upgrade protobuf
 
@@ -24,5 +25,6 @@ Hỏi GPT cách chuyển là OK.
 # Bước 4:
 Gõ lệnh: python genAI.py
 Gõ lệnh : python ai_service.py
+
 Gõ lệnh: python app.py
 

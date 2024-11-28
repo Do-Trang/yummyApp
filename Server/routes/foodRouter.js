@@ -18,4 +18,7 @@ foodRouter.put('/:foodId', isAuth, FoodController.updateFood);
 // Route to get all food items of the user's restaurants
 foodRouter.get('/my-foods', isAuth, FoodController.getMyFood);
 
+// Route to get food detail by ID
+foodRouter.get('/:foodId', isAuth, FoodController.getFoodById);
+
 module.exports = foodRouter;

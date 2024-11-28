@@ -1,80 +1,90 @@
 import React, { useState } from 'react';
-import { Text, View, Image, Modal, Animated, TouchableOpacity, useWindowDimensions, Linking, TouchableWithoutFeedback, ScrollView } from 'react-native';
+import { Text, View, Image, Modal, Animated, TouchableOpacity, useWindowDimensions, Linking, TouchableWithoutFeedback, ScrollView, Dimensions } from 'react-native';
 import Icon from 'react-native-vector-icons/Ionicons';
 import { ProgressBar } from 'react-native-paper';
 import styles from './RestaurantModalStyles';
+import { PinchGestureHandler, State } from 'react-native-gesture-handler';
 
 const ggMap = 'https://www.google.com/maps/search/';
+const { width: windowWidth } = Dimensions.get('window');
 
-function RestaurantDetail(props) {
-  const window = useWindowDimensions();
-  const [modalVisible, setModalVisible] = useState(false);
-  const [modalPosition] = useState(new Animated.Value(window.height));
+function RestaurantDetail({ id, modalPosition, onClose, modalVisible, restaurantDetails }) {
+  const [loading, setLoading] = useState(false);
+  const [imageHeight, setImageHeight] = useState(200);
+  const [scale, setScale] = useState(new Animated.Value(1));
+  const pinchRef = React.useRef();
 
-  const title = props.name ?? 'Unknown Restaurant';
-  const restaurantAddress = props.address ?? 'Unknown Address';
-  const phoneNumber = props.phone_number ?? 'No phone number available';
-  const website = props.website ?? 'No website available';
-  const description = props.description ?? 'Restaurant description.';
-  const image = props.image_url ?? null;
-  const rating = JSON.parse(props.rating) ?? {};
-  const tags = props.tags ?? [];
-
-  const openModal = () => {
-    setModalVisible(true);
-    Animated.timing(modalPosition, {
-      toValue: 0,
-      duration: 900,
-      useNativeDriver: true
-    }).start();
+  const onImageLoad = (event) => {
+    const { width, height } = event.nativeEvent.source;
+    const aspectRatio = height / width;
+    setImageHeight(windowWidth * aspectRatio);
   };
 
-  const closeModal = () => {
-    Animated.timing(modalPosition, {
-      toValue: window.height,
-      duration: 500,
-      useNativeDriver: true
-    }).start(() => setModalVisible(false));
-  };
-
-  const openGoogleMaps = (address) => {
+  const openGoogleMaps = address => {
     const url = `${ggMap}${encodeURIComponent(address)}`;
     Linking.openURL(url);
   };
 
+  const onHandlerStateChange = (event) => {
+    if (event.nativeEvent.oldState === State.ACTIVE) {
+      Animated.spring(scale, {
+        toValue: 1,
+        useNativeDriver: true,
+      }).start();
+    }
+  };
+
+  const handlePinchGesture = Animated.event(
+    [{ nativeEvent: { scale: scale } }],
+    { useNativeDriver: true }
+  );
+
+  if (loading) {
+    return (
+      <View style={styles.container}>
+        <Text style={styles.loadingText}>Loading...</Text>
+      </View>
+    );
+  }
+
   return (
     <View style={styles.container}>
-      <TouchableOpacity onPress={openModal}>
-        <Text style={styles.triggerText}>Show Restaurant Details</Text>
-      </TouchableOpacity>
-
-      <Modal visible={modalVisible} transparent={true} onRequestClose={closeModal} propagateSwipe={true}>
+      <Modal visible={modalVisible} transparent={true} onRequestClose={onClose} propagateSwipe={true}>
         <ScrollView contentContainerStyle={styles.scrollContent}>
-          <TouchableWithoutFeedback onPress={closeModal}>
+          <TouchableWithoutFeedback onPress={onClose}>
             <View style={styles.modalOverlay}>
               <Animated.View
                 style={[styles.modalContent, { transform: [{ translateY: modalPosition }] }]}
               >
                 <View>
-                  <Text style={styles.title}>{title}</Text>
+                  <Text style={styles.title}>{restaurantDetails.restaurant.name}</Text>
                 </View>
 
-                {image && (
-                  <Image
+                <PinchGestureHandler
+                  ref={pinchRef}
+                  onGestureEvent={handlePinchGesture}
+                  onHandlerStateChange={onHandlerStateChange}
+                >
+                  <Animated.View
                     style={{
-                      width: window.width,
-                      height: window.width / 2,
+                      width: windowWidth - 20,
+                      height: imageHeight,
                       alignSelf: 'center',
+                      transform: [{ scale: scale }],
                     }}
-                    resizeMode="center"
-                    source={{ uri: image }}
-                  />
-                )}
+                  >
+                    <Image
+                      style={{ width: '100%', height: '100%' }}
+                      resizeMode="contain"
+                      source={{ uri: restaurantDetails.restaurant.image_url }}
+                      onLoad={onImageLoad}
+                    />
+                  </Animated.View>
+                </PinchGestureHandler>
 
-                {/* Tags Section */}
                 <View style={styles.section}>
                   <Text style={styles.tags}>
-                    {tags.map((tag, index) => (
+                    {restaurantDetails.restaurant.tags.map((tag, index) => (
                       <View key={index} style={{ flexDirection: 'row', alignItems: 'center' }}>
                         <Icon name="pricetag" size={16} color="blue" />
                         <Text style={styles.tagText}>{tag + '   '}</Text>
@@ -83,19 +93,18 @@ function RestaurantDetail(props) {
                   </Text>
                 </View>
 
-                {/* Description Section */}
                 <View style={styles.section}>
                   <View style={{ flexDirection: 'row', alignItems: 'center' }}>
                     <Icon name="document-text" size={20} color="blue" />
                     <Text style={styles.desc}>Description</Text>
                   </View>
-                  <Text style={styles.desc}>{description}</Text>
+                  <Text style={styles.desc}>{restaurantDetails.restaurant.description}</Text>
                 </View>
 
                 {/* Address Section */}
                 <View style={styles.section}>
                   <TouchableOpacity
-                    onPress={() => openGoogleMaps(restaurantAddress)}
+                    onPress={() => openGoogleMaps(restaurantDetails.restaurant.address)}
                     style={[styles.desc, styles.link]}
                   >
                     <View>
@@ -104,84 +113,68 @@ function RestaurantDetail(props) {
                             <Text style={[styles.desc, { marginLeft: 5 }]}>Address:</Text>
                         </View>
                         <Text style={styles.desc}>
-                           {restaurantAddress}
+                           {restaurantDetails.restaurant.address}
                         </Text>
                     </View>
                   </TouchableOpacity>
                 </View>
 
-                {/* Rating Section */}
-                {rating && Object.keys(rating).length > 0 && (
+                {restaurantDetails.restaurant.rating && (
                   <View style={styles.section}>
                     <View style={{ flexDirection: 'row', alignItems: 'center' }}>
                       <Icon name="star-sharp" size={20} color="yellow" />
                       <Text style={[styles.desc, { marginLeft: 5 }]}>Ratings</Text>
                     </View>
 
-                    {/* Rating - Service */}
-                    <View style={styles.ratingContainer}>
-                        <Text style={styles.desc}>SERVICE: {rating.restaurant_rating_service} / 10</Text>
-                        <ProgressBar
-                        progress={parseFloat(rating.restaurant_rating_service) / 10}
-                        color="green"
-                        style={{ marginBottom: 10 }}
-                        />
-                    </View>
+                    <Text style={styles.desc}>SERVICE: {restaurantDetails.restaurant.rating.restaurant_rating_service} / 10</Text>
+                    <ProgressBar
+                      progress={parseFloat(restaurantDetails.restaurant.rating.restaurant_rating_service) / 10}
+                      color="green"
+                      style={{ marginBottom: 10 }}
+                    />
 
-                    {/* Rating - Price */}
-                    <View style={styles.ratingContainer}>
-                        <Text style={styles.desc}>PRICE: {rating.restaurant_rating_price} / 10</Text>
-                        <ProgressBar
-                        progress={parseFloat(rating.restaurant_rating_price) / 10}
-                        color="orange"
-                        style={{ marginBottom: 10 }}
-                        />
-                    </View>
+                    <Text style={styles.desc}>PRICE: {restaurantDetails.restaurant.rating.restaurant_rating_price} / 10</Text>
+                    <ProgressBar
+                      progress={parseFloat(restaurantDetails.restaurant.rating.restaurant_rating_price) / 10}
+                      color="orange"
+                      style={{ marginBottom: 10 }}
+                    />
 
-                    {/* Rating - Food */}
-                    <View style={styles.ratingContainer}>
-                        <Text style={styles.desc}>FOOD: {rating.restaurant_rating_food} / 10</Text>
-                        <ProgressBar
-                        progress={parseFloat(rating.restaurant_rating_food) / 10}
-                        color="blue"
-                        style={{ marginBottom: 10 }}
-                        />
-                    </View>
+                    <Text style={styles.desc}>FOOD: {restaurantDetails.restaurant.rating.restaurant_rating_food} / 10</Text>
+                    <ProgressBar
+                      progress={parseFloat(restaurantDetails.restaurant.rating.restaurant_rating_food) / 10}
+                      color="blue"
+                      style={{ marginBottom: 10 }}
+                    />
 
-                    {/* Rating - Decoration */}
-                    <View style={styles.ratingContainer}>
-                        <Text style={styles.desc}>DECORATION: {rating.restaurant_rating_decoration} / 10</Text>
-                        <ProgressBar
-                        progress={parseFloat(rating.restaurant_rating_decoration) / 10}
-                        color="red"
-                        style={{ marginBottom: 10 }}
-                        />
-                    </View>
-
+                    <Text style={styles.desc}>DECORATION: {restaurantDetails.restaurant.rating.restaurant_rating_decoration} / 10</Text>
+                    <ProgressBar
+                      progress={parseFloat(restaurantDetails.restaurant.rating.restaurant_rating_decoration) / 10}
+                      color="red"
+                      style={{ marginBottom: 10 }}
+                    />
                   </View>
                 )}
 
-                {/* Phone Section */}
                 <View style={styles.section}>
                     <View style={{flexDirection: 'row', alignItems: 'center',}}>
                         <Icon name="call-sharp" size={20} color="green" style={styles.icon} />
                         <Text style={[styles.desc, { marginTop: 1, marginLeft: 5 }]}>Phone:</Text>
                     </View>
-                    <Text style={styles.desc}>{phoneNumber}</Text>
+                    <Text style={styles.desc}>{restaurantDetails.restaurant.phone_number}</Text>
                 </View>
 
-                {/* Website Section */}
                 <View style={styles.section}>
                     <View style={{flexDirection: 'row', alignItems: 'center',}}>
                         <Icon name="globe-sharp" size={20} color="blue" style={styles.icon} />
                         <Text style={[styles.desc, { marginTop: 1, marginLeft: 5 }]}>Website: </Text>
                     </View>
-                    {website !== 'No website available' ? (
+                    {restaurantDetails.restaurant.website !== 'No website available' ? (
                     <Text
                         style={[styles.desc, styles.link]}
-                        onPress={() => Linking.openURL(website)}
+                        onPress={() => Linking.openURL(restaurantDetails.restaurant.website)}
                     >
-                        {website}
+                        {restaurantDetails.restaurant.website}
                     </Text>
                     ) : (
                     <Text style={styles.desc}>No website available</Text>
