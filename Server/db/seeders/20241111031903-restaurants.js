@@ -8,7 +8,6 @@ module.exports = {
      */
     await queryInterface.bulkInsert('restaurants',[
       {
-        restaurant_id: 1,
         user_id: 1,
         name: "Bún bò Huế Ngự Uyển",
         address: "N4 A9 Đường Mỹ Đình (Đối Diện Số 88 Mỹ Đình), P. Mỹ Đình 2, Quận Nam Từ Liêm, Hà Nội",
@@ -26,7 +25,6 @@ module.exports = {
       },
 
       {
-        restaurant_id: 2,
         user_id: 1,
         name: "Kiroku Japanese Restaurant",
         address: "85 Đường Triệu Việt Vương, Bùi Thị Xuân, Quận Hai Bà Trưng, Hà Nội",
@@ -44,7 +42,6 @@ module.exports = {
       },
 
       {
-        restaurant_id: 3,
         user_id: 1,
         name: "Azuma Japanese Restaurant",
         address: "Số 23 Ngọc Khánh, Giảng Võ, Quận Ba Đình, Hà Nội",
@@ -62,7 +59,6 @@ module.exports = {
       },
 
       {
-        restaurant_id: 4,
         user_id: 1,
         name: "Mỳ Oshi 03",
         address: "25 Triệu Việt Vương, Bùi Thị Xuân, Hai Bà Trưng, Hà Nội",
@@ -80,7 +76,6 @@ module.exports = {
       },
 
       {
-        restaurant_id: 5,
         user_id: 2,
         name: "Phở Lý Quốc Sư",
         address: "Số 10 Võ Chí Công, Xuân La, Tây Hồ, Hà Nội",
@@ -98,7 +93,6 @@ module.exports = {
       },
 
       {
-        restaurant_id: 6,
         user_id: 2,
         name: "Habit BBQ",
         address: "Số 3 Dịch Vọng Hậu, quận Cầu Giấy",
@@ -116,7 +110,6 @@ module.exports = {
       },
 
       {
-        restaurant_id: 7,
         user_id: 2,
         name: "Chè Sầu Liên",
         address: "79 Trần Quốc Hoàn, Quận Cầu Giấy, Hà Nội",

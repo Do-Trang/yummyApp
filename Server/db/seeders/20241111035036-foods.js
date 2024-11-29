@@ -8,7 +8,6 @@ module.exports = {
      */
     await queryInterface.bulkInsert('foods', [
       {
-        food_id: 1,
         user_id: 2,
         name: 'Phở bò tái',
         description: 'Phở bò tái gồm sợi phở mềm mịn và nước dùng ninh từ xương bò, mang hương vị ngọt tự nhiên. Thịt bò tái thái mỏng được cho vào bát phở và chín tái khi tiếp xúc với nước dùng nóng. Món ăn thường kèm rau thơm như húng quế, ngò gai, giá đỗ và chanh tươi để tăng thêm hương vị.',
@@ -25,7 +24,6 @@ module.exports = {
       },
 
       {
-        food_id: 2,
         user_id: 2,
         name: 'Phở gà',
         description: 'Phở gà gồm sợi phở mềm mịn, nước dùng ninh từ xương gà mang hương vị ngọt tự nhiên. Thịt gà xé sợi, chín tới, cùng với trứng trần được cho vào bát phở và thưởng thức cùng với rau thơm như húng quế, giá đỗ và chanh tươi để tăng thêm hương vị.',
@@ -42,7 +40,6 @@ module.exports = {
       },
 
       {
-        food_id: 3,
         user_id: 1,
         name: 'Bún bò Huế',
         description: 'Bún bò Huế là món ăn đặc sản nổi tiếng của miền Trung Việt Nam, với sợi bún to và nước dùng ninh từ xương bò, tạo vị ngọt tự nhiên. Nước dùng có màu đỏ đặc trưng nhờ gia vị như mắm ruốc và ớt. Món ăn được phục vụ với nhiều topping phong phú như thịt bò, giò lụa, chả bò, trứng cút, và rau sống, mang đến hương vị đậm đà và trải nghiệm ẩm thực độc đáo.',
@@ -59,7 +56,6 @@ module.exports = {
       },
 
       {
-        food_id: 4,
         user_id: 1,
         name: 'Ramen',
         description: 'Ramen là món mì của Nhật Bản, với sợi mì mềm dai kết hợp nước dùng đậm đà từ xương và gia vị. Mỗi bát ramen thường được phục vụ với các loại topping như thịt heo, trứng lòng đào, măng, và rong biển. Nước dùng có thể thay đổi theo vùng miền, từ vị mặn của Shio, vị béo của Tonkotsu đến vị đậu nành đặc trưng của Shoyu, mang đến trải nghiệm đa dạng và hấp dẫn cho thực khách.',
@@ -76,7 +72,6 @@ module.exports = {
       },
 
       {
-        food_id: 5,
         user_id: 1,
         name: 'Tempura',
         description: 'Tempura là món ăn truyền thống Nhật Bản gồm các loại hải sản hoặc rau củ được tẩm bột mỏng và chiên giòn. Với lớp bột chiên nhẹ, giòn tan, tempura giữ được hương vị tươi ngon của nguyên liệu bên trong mà không quá béo. Thường được dùng kèm với nước chấm nhẹ và củ cải bào, tempura mang đến trải nghiệm ẩm thực tinh tế và hài hòa.',
@@ -93,7 +88,6 @@ module.exports = {
       },
 
       {
-        food_id: 6,
         user_id: 1,
         name: 'Sushi',
         description: 'Sushi là một món ăn truyền thống của Nhật Bản, nổi bật với sự kết hợp giữa cơm và hải sản tươi sống. Cơm sushi được chế biến từ gạo đặc biệt và trộn với giấm. Có nhiều loại sushi như nigiri (cơm nắm tay với hải sản phía trên), maki (cuộn sushi trong tảo biển) và sashimi (hải sản tươi sống). Không chỉ ngon miệng, sushi còn được trình bày đẹp mắt.',
@@ -110,7 +104,6 @@ module.exports = {
       },
 
       {
-        food_id: 7,
         user_id: 1,
         name: 'Cơm bò Wagyu',
         description: 'Cơm bò Wagyu là món ăn đặc biệt với phần thịt bò Wagyu mềm, mỡ hòa quyện, được chế biến với độ chín hoàn hảo và ăn kèm cơm trắng dẻo thơm. Món ăn thường được trang trí với rau củ tươi và nước sốt đặc biệt, mang đến một trải nghiệm ẩm thực đẳng cấp với hương vị ngọt ngào, béo ngậy.',
@@ -127,7 +120,6 @@ module.exports = {
       },
 
       {
-        food_id: 8,
         user_id: 2,
         name: 'Sườn cừu nướng',
         description: 'Sườn cừu nướng với gia vị đặc biệt và sốt BBQ, được nướng trên than hồng, mang đến hương vị đậm đà, thơm ngon, thích hợp cho những người yêu thích món nướng.',
@@ -144,7 +136,6 @@ module.exports = {
       },
 
       {
-        food_id: 9,
         user_id: 2,
         name: 'Tào phớ trân châu đường đen',
         description: 'Tào phớ trân châu đường đen là một món tráng miệng nổi tiếng, kết hợp giữa tào phớ mềm mịn, trân châu dẻo và nước đường đen ngọt ngào. Món ăn này không chỉ có vị ngọt thanh mà còn mang lại cảm giác bùi bùi, béo ngậy, tạo nên sự kết hợp hoàn hảo cho những ai yêu thích món ngọt. Món này thường được dùng lạnh, rất thích hợp vào những ngày hè oi ả.',
@@ -161,7 +152,6 @@ module.exports = {
       },
       
       {
-        food_id: 10,
         user_id: 2,
         name: 'Chè Thái',
         description: 'Chè Thái là một món chè nổi bật trong ẩm thực Việt Nam, được làm từ các loại trái cây tươi ngon như mít, xoài, dưa hấu, và thạch, cùng với nước cốt dừa béo ngậy. Món chè này không chỉ thơm ngon mà còn mang đến một sự kết hợp thú vị giữa vị ngọt tự nhiên của trái cây và sự mát lạnh của nước cốt dừa, tạo nên một món ăn tráng miệng tuyệt vời cho mọi lứa tuổi. Chè Thái thường được thưởng thức trong những buổi chiều hè mát mẻ.',
@@ -178,7 +168,6 @@ module.exports = {
       },
 
       {
-        food_id: 11,
         user_id: 2,
         name: 'Sữa chua mít',
         description: 'Sữa chua mít là món ăn tráng miệng quen thuộc trong ẩm thực Việt Nam, kết hợp giữa sữa chua mát lạnh và mít tươi ngon, tạo thành một món ăn ngọt ngào, thơm lừng. Những miếng mít chín mềm được kết hợp với sữa chua tạo nên sự hòa quyện tuyệt vời giữa vị ngọt tự nhiên của trái cây và độ mát của sữa chua. Món ăn này không chỉ ngon miệng mà còn bổ dưỡng, thích hợp cho mọi lứa tuổi.',
