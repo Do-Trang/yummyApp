@@ -23,14 +23,26 @@ const getRestaurantByCriteria = async (name = '', address = '', tags = [], minRa
     }
 
     if (minRating) {
-        whereConditions.rating = {
-            [Op.contains]: JSON.stringify({
-                "restaurant_rating_food": minRating,
-                "restaurant_rating_service": minRating,
-                "restaurant_rating_price": minRating,
-                "restaurant_rating_decoration": minRating
-            })
-        };
+        if(minRating.restaurant_rating_food) {
+            whereConditions["restaurant_rating_food"] = {
+                [Op.gte]: minRating.restaurant_rating_food
+            }
+        }
+        if(minRating.restaurant_rating_service) {
+            whereConditions["restaurant_rating_service"] = {
+                [Op.gte]: minRating.restaurant_rating_service
+            }
+        }
+        if(minRating.restaurant_rating_price) {
+            whereConditions["restaurant_rating_price"] = {
+                [Op.gte]: minRating.restaurant_rating_price
+            }
+        }
+        if(minRating.restaurant_rating_decoration) {
+            whereConditions["restaurant_rating_decoration"] = {
+                [Op.gte]: minRating.restaurant_rating_decoration
+            }
+        }
     }
 
     const restaurants = await Restaurant.findAll({
@@ -65,7 +77,6 @@ const getRestaurantByCriteria = async (name = '', address = '', tags = [], minRa
 };
 
 const addRestaurant = async (userId, name, address, phone_number, website, description, image_url, rating, tags) => {
-    const formattedRating = rating ? JSON.stringify(rating) : null;
 
     const newRestaurant = await Restaurant.create({
         user_id: userId,
@@ -75,7 +86,7 @@ const addRestaurant = async (userId, name, address, phone_number, website, descr
         website: website,
         description: description,
         image_url: image_url,
-        rating: formattedRating,
+        rating: rating,
         tags: tags
     });
 

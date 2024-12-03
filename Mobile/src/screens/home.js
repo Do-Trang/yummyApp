@@ -153,7 +153,7 @@ function Home() {
             description={currentFood.description}
             price={currentFood.price}
             food_id={currentFood.food_id}
-            rating={currentFood.rating ? currentFood.rating.average : 'N/A'}
+            rating={currentFood.rating}
             restaurantName={currentFood.restaurantName}
             restaurantAddress={currentFood.restaurantAddress}
           />
@@ -171,7 +171,7 @@ function Home() {
             description={currentRestaurant.description}
             address={currentRestaurant.address}
             restaurant_id={currentRestaurant.restaurant_id}
-            rating={currentRestaurant.rating ? currentRestaurant.rating.average : 'N/A'}
+            rating={currentRestaurant.rating}
             phone_number={currentRestaurant.phone_number}
             website={currentRestaurant.website}
           />

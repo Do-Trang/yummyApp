@@ -58,7 +58,7 @@ function PersonalDetail({ modalPosition, onClose, modalVisible, personalDetails 
                   >
                       <View style={styles.overlay} />
                   </ImageBackground>
-              </View>
+                </View>
                 <View style={styles.headerContainer}>
                   <View style={styles.avatarContainer}>
                     <Image source={{ uri: personalDetails.user.avatar_url }} style={styles.avatar} resizeMode="cover" />

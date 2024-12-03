@@ -94,6 +94,7 @@ const addFood = async (userId, name, description, price, image_url, rating, tags
     if (!restaurant) {
         return { success: false, message: 'Restaurant does not exist, please add the restaurant first.' };
     }
+    console.log(rating)
 
     const newFood = await Food.create({
         user_id: userId,
@@ -101,7 +102,7 @@ const addFood = async (userId, name, description, price, image_url, rating, tags
         description: description,
         price: price,
         image_url: image_url,
-        rating: JSON.stringify(rating),
+        rating: rating,
         tags: tags,
         restaurant_id: restaurant.restaurant_id
     });

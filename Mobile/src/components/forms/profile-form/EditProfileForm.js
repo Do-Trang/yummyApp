@@ -27,7 +27,7 @@ const EditProfileForm = ({ avatar_url, username, address, gender, dob, descripti
 
     const uploadImage = async (uri) => {
         const fileName = uri.substring(uri.lastIndexOf('/') + 1);
-        const reference = storage().ref(`foods/${fileName}`);
+        const reference = storage().ref(`avatars/${fileName}`);
 
         try {
             await reference.putFile(uri);

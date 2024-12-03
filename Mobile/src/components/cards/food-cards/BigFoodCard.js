@@ -49,7 +49,7 @@ function BigFoodCard({username, user_id, name, tags, image_url, description, pri
 
   return (
     <View style={styles.detailView}>
-      <Image style={{ width: windowWidth, height: windowWidth }} source={{ uri: image_url }} />
+      <Image style={{ width: windowWidth - 10, height: windowWidth - 10 }} source={{ uri: image_url }} />
       <View style={GlobalStyle.TitleBox}>
         <Text style={GlobalStyle.Title}>{name}</Text>
       </View>

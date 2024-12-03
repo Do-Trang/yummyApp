@@ -4,7 +4,7 @@ import colors from '../../../constants/colors';
 const restaurantCardStyles = StyleSheet.create({
   detailView: {
     flex: 1,
-    backgroundColor: colors.gray,
+    backgroundColor: colors.white,
     padding: 16,
   },
   content: {
@@ -43,6 +43,11 @@ const restaurantCardStyles = StyleSheet.create({
   smallCardImage: {
     borderTopLeftRadius: 10,
     borderBottomLeftRadius: 10,
+  },
+  username: {
+    marginTop: 5,
+    marginLeft: 10,
+    color: colors.home2,
   },
 });
 

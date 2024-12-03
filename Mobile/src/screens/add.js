@@ -1,12 +1,5 @@
 import React, { useState } from 'react';
-import {
-  Text,
-  View,
-  ScrollView,
-  StyleSheet,
-  Dimensions,
-  Image
-} from 'react-native';
+import {Text, View, ScrollView, StyleSheet, Dimensions, Image} from 'react-native';
 import { TextInput } from 'react-native-paper';
 import CustomButton, { CustomButtonText } from '../components/CustomButton';
 import { launchImageLibrary } from 'react-native-image-picker';
@@ -19,24 +12,21 @@ import colors from '../constants/colors';
 import { connect } from 'react-redux';
 import { createIngredient, createTag } from '../redux/actions';
 import { Icons } from '../components/icons';
-import RadioThree from '../components/RadioThree';
+import storage from '@react-native-firebase/storage';
+import Snackbar from "react-native-snackbar";
 
 function add(props) {
-  const note = {
-    'Ăn tại quán': 1,
-    'Hút thuốc': 3,
-    'Thú cưng': 2,
-    'Wife': 1,
-    'Chỉ mang đi': 1,
-  };
   const initialFood = {
     title: '',
     description: '',
     price: '',
     tags: [],
     image: null,
-    rating: null,
     restaurant_name: '',
+    food_rating_delicious: 0,
+    food_rating_presentation: 0,
+    food_rating_price: 0,
+    food_rating_fresh: 0
   };
   const initialRestaurant = {
     title: '',
@@ -46,8 +36,12 @@ function add(props) {
     description: '',
     phone_number: '',
     website: '',
-    rating: null,
+    restaurant_rating_service: 0,
+    restaurant_rating_price: 0,
+    restaurant_rating_food: 0,
+    restaurant_rating_decoration: 0,
   };
+
   const [newFood, setNewFood] = useState(initialFood);
   const [type, setType] = useState('food');
   const [newRestaurant, setNewRestaurant] = useState(initialRestaurant);
@@ -70,9 +64,29 @@ function add(props) {
   function _onChangeWebsite(text) {
     setNewRestaurant({ ...newRestaurant, website: text });
   }
-  function _onChangeRating(text) {
-    type === 'food' ? setNewFood({ ...newFood, rating: text }) : setNewRestaurant({ ...newRestaurant, rating: text });
+  function _onChangeRating(field, text) {
+    if (type === 'food') {
+      setNewFood({ ...newFood, [`food_rating_${field}`]: text });
+    } else {
+      setNewRestaurant({ ...newRestaurant, [`restaurant_rating_${field}`]: text });
+    }
   }
+
+  const uploadImage = async (uri) => {
+    const fileName = uri.substring(uri.lastIndexOf('/') + 1);
+    const pathPrefix = type === 'food' ? 'foods/' : 'restaurants/';
+    const reference = storage().ref(`${pathPrefix}${fileName}`);
+
+    try {
+        await reference.putFile(uri);
+        const url = await reference.getDownloadURL();
+        return url;
+    } catch (error) {
+        console.error('Upload failed: ', error);
+    }
+  };
+
+
   function _onChangeRestaurantName(text) {
     setNewFood({ ...newFood, restaurant_name: text });
   }
@@ -161,25 +175,39 @@ function add(props) {
   }
 
   async function _createFood() {
+    const imageUrl = await uploadImage(newFood.image.uri);
     const simpleTags = getSimmpleTagList(newFood.tags);
 
     try {
       const response = await client.post('foods/create-foods', {
-//        userId: 1,
         name: newFood.title,
         description: newFood.description,
         price: newFood.price,
-        image_url: newFood.image.uri,
-        rating: newFood.rating,
+        image_url: imageUrl,
+        rating: {
+          "food_rating_delicious": parseFloat(newFood.food_rating_delicious),
+          "food_rating_presentation": parseFloat(newFood.food_rating_presentation),
+          "food_rating_price": parseFloat(newFood.food_rating_price),
+          "food_rating_fresh": parseFloat(newFood.food_rating_fresh)
+        },
         tags: simpleTags,
         restaurant_name: newFood.restaurant_name
       });
 
-      if (response.data.success) {
-        console.log('Food added successfully!');
+      if (response.data.message == "Food added successfully!") {
         setNewFood({ ...initialFood });
+        Snackbar.show({
+          text: 'Food added successfully!',
+          backgroundColor: colors.success,
+          duration: Snackbar.LENGTH_SHORT,
+        });
       } else {
         console.error('Failed to add food:', response.data.message);
+        Snackbar.show({
+          text: 'Error adding food!',
+          backgroundColor: colors.error,
+          duration: Snackbar.LENGTH_SHORT,
+        });
       }
     } catch (error) {
       console.error('Error adding food:', error);
@@ -188,25 +216,40 @@ function add(props) {
 
   async function _createRestaurant() {
     const simpleTags = getSimmpleTagList(newRestaurant.tags);
+    const imageUrl = await uploadImage(newRestaurant.image.uri);
 
     try {
       const response = await client.post('restaurants/add-restaurant', {
-//        userId: 1,
         name: newRestaurant.title,
         address: newRestaurant.address.trim(),
         phone_number: newRestaurant.phone_number,
         website: newRestaurant.website,
         description: newRestaurant.description,
-        image_url: newRestaurant.image.uri,
-        rating: newRestaurant.rating,
+        image_url: imageUrl,
+        rating: {
+          "restaurant_rating_service": parseFloat(newRestaurant.restaurant_rating_service),
+          "restaurant_rating_price": parseFloat(newRestaurant.restaurant_rating_price),
+          "restaurant_rating_food": parseFloat(newRestaurant.restaurant_rating_food),
+          "restaurant_rating_decoration": parseFloat(newRestaurant.restaurant_rating_decoration),
+        },
         tags: simpleTags
       });
 
       if (response.data.success) {
         console.log('Restaurant added successfully!');
         setNewRestaurant({ ...initialRestaurant });
+        Snackbar.show({
+          text: 'Restaurant added successfully!',
+          backgroundColor: colors.success,
+          duration: Snackbar.LENGTH_SHORT,
+        });
       } else {
         console.error('Failed to add restaurant:', response.data.message);
+        Snackbar.show({
+          text: 'Failed to add restaurant!',
+          backgroundColor: colors.error,
+          duration: Snackbar.LENGTH_SHORT,
+        });
       }
     } catch (error) {
       console.error('Error adding restaurant:', error);
@@ -217,6 +260,9 @@ function add(props) {
     return list.map(item => item.id) ?? [];
   };
 
+  console.log(1, newRestaurant);
+  console.log(2, newFood);
+
   return (
     <View
       style={[
@@ -224,7 +270,7 @@ function add(props) {
         { flex: 1, height: Dimensions.get('window').height },
       ]}>
       <CustomButton
-        icon_name={type == 'food' ? 'hamburger' : 'store'}
+        icon_name={type == 'food' ? 'store' : 'hamburger'}
         style={styles.typeIcon}
         onPress={() => {
           if (type === 'food') {
@@ -237,14 +283,14 @@ function add(props) {
         type={Icons.FontAwesome5}
       />
       <View style={[GlobalStyle.TitleBoxHeader]}>
-        <Text style={GlobalStyle.Title}>Thêm</Text>
+        <Text style={GlobalStyle.Title}>Add</Text>
       </View>
-      <View style={[GlobalStyle.content, { width: '80%', paddingBottom: 64 }]}>
+      <View style={[GlobalStyle.content, { width: '87%', paddingBottom: 64 }]}>
         <ScrollView>
           {/* title */}
           <TextInput
             style={[GlobalStyle.textInput]}
-            label="Tên"
+            label="Name"
             textAlignVertical="center"
             selectionColor={colors.primary40}
             value={type === 'food' ? newFood.title : newRestaurant.title}
@@ -254,7 +300,7 @@ function add(props) {
           {/* description */}
           <TextInput
             style={[GlobalStyle.textInput]}
-            label="Miêu tả"
+            label="Description"
             textAlignVertical="center"
             selectionColor={colors.primary40}
             value={type === 'food' ? newFood.description : newRestaurant.description}
@@ -266,11 +312,12 @@ function add(props) {
           {type === 'food' && (
             <TextInput
               style={[GlobalStyle.textInput]}
-              label="Giá"
+              label="Price"
               textAlignVertical="center"
               selectionColor={colors.primary40}
               value={newFood.price}
               onChangeText={_onChangePrice}
+              keyboardType="numeric"
             />
           )}
 
@@ -278,7 +325,7 @@ function add(props) {
           {type === 'restaurant' && (
             <TextInput
               style={[GlobalStyle.textInput]}
-              label="Địa chỉ"
+              label="Address"
               textAlignVertical="center"
               selectionColor={colors.primary40}
               value={newRestaurant.address}
@@ -290,11 +337,12 @@ function add(props) {
           {type === 'restaurant' && (
             <TextInput
               style={[GlobalStyle.textInput]}
-              label="Số điện thoại"
+              label="Phone number"
               textAlignVertical="center"
               selectionColor={colors.primary40}
               value={newRestaurant.phone_number}
               onChangeText={_onChangePhoneNumber}
+              keyboardType="numeric"
             />
           )}
 
@@ -310,21 +358,121 @@ function add(props) {
             />
           )}
 
-          {/* rating */}
-          <TextInput
-            style={[GlobalStyle.textInput]}
-            label="Đánh giá"
-            textAlignVertical="center"
-            selectionColor={colors.primary40}
-            value={type === 'food' ? newFood.rating : newRestaurant.rating}
-            onChangeText={_onChangeRating}
-          />
+          {/* rating food */}
+          {type === 'food' && <View style={{ marginTop: 10 }}>
+            <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginBottom: 10 }}>
+              <View style={{ flex: 1, marginRight: 10 }}>
+                <TextInput
+                  style={[GlobalStyle.textInput]}
+                  label="Rating delicious"
+                  textAlignVertical="center"
+                  selectionColor={colors.primary40}
+                  value={newFood.food_rating_delicious}
+                  onChangeText={text => _onChangeRating('delicious', text)}
+                  keyboardType="numeric"
+                />
+              </View>
+
+              <View style={{ flex: 1 }}>
+                <TextInput
+                  style={[GlobalStyle.textInput]}
+                  label="Rating presentation"
+                  textAlignVertical="center"
+                  selectionColor={colors.primary40}
+                  value={newFood.food_rating_presentation}
+                  onChangeText={text => _onChangeRating('presentation', text)}
+                  keyboardType="numeric"
+                />
+              </View>
+            </View>
+
+            <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
+              <View style={{ flex: 1, marginRight: 10 }}>
+                <TextInput
+                  style={[GlobalStyle.textInput]}
+                  label="Rating price"
+                  textAlignVertical="center"
+                  selectionColor={colors.primary40}
+                  value={newFood.food_rating_price}
+                  onChangeText={text => _onChangeRating('price', text)}
+                  keyboardType="numeric"
+                />
+              </View>
+
+              <View style={{ flex: 1 }}>
+                <TextInput
+                  style={[GlobalStyle.textInput]}
+                  label="Rating fresh"
+                  textAlignVertical="center"
+                  selectionColor={colors.primary40}
+                  value={newFood.food_rating_fresh}
+                  onChangeText={text => _onChangeRating('fresh', text)}
+                  keyboardType="numeric"
+                />
+              </View>
+            </View>
+          </View>}
+
+          {/* rating restaurant*/}
+          {type === 'restaurant' && <View style={{ marginTop: 10 }}>
+            <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginBottom: 10 }}>
+              <View style={{ flex: 1, marginRight: 10 }}>
+                <TextInput
+                  style={[GlobalStyle.textInput]}
+                  label="Rating service"
+                  textAlignVertical="center"
+                  selectionColor={colors.primary40}
+                  value={newRestaurant.restaurant_rating_service}
+                  onChangeText={text => _onChangeRating('service', text)}
+                  keyboardType="numeric"
+                />
+              </View>
+
+              <View style={{ flex: 1 }}>
+                <TextInput
+                  style={[GlobalStyle.textInput]}
+                  label="Rating price"
+                  textAlignVertical="center"
+                  selectionColor={colors.primary40}
+                  value={newRestaurant.restaurant_rating_price}
+                  onChangeText={text => _onChangeRating('price', text)}
+                  keyboardType="numeric"
+                />
+              </View>
+            </View>
+
+            <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
+              <View style={{ flex: 1, marginRight: 10 }}>
+                <TextInput
+                  style={[GlobalStyle.textInput]}
+                  label="Rating food"
+                  textAlignVertical="center"
+                  selectionColor={colors.primary40}
+                  value={newRestaurant.restaurant_rating_food}
+                  onChangeText={text => _onChangeRating('food', text)}
+                  keyboardType="numeric"
+                />
+              </View>
+
+              <View style={{ flex: 1 }}>
+                <TextInput
+                  style={[GlobalStyle.textInput]}
+                  label="Rating decoration"
+                  textAlignVertical="center"
+                  selectionColor={colors.primary40}
+                  value={newRestaurant.restaurant_rating_decoration}
+                  onChangeText={text => _onChangeRating('decoration', text)}
+                  keyboardType="numeric"
+                />
+              </View>
+            </View>
+          </View>}
 
           {/* restaurant name */}
           {type === 'food' && (
             <TextInput
               style={[GlobalStyle.textInput]}
-              label="Tên nhà hàng"
+              label="Restaurant name"
               textAlignVertical="center"
               selectionColor={colors.primary40}
               value={newFood.restaurant_name}
@@ -337,7 +485,7 @@ function add(props) {
             <CustomButtonText
               onPress={_onChangeImage}
               colors={[colors.home1, colors.home2]}
-              content={'Chọn ảnh'}
+              content={'Pick image'}
               padding={'2%'}
             />
             {
@@ -358,7 +506,7 @@ function add(props) {
 
           {type === 'food' && <MiniSearchbox
             list={props.tags.data}
-            title="Thẻ tag"
+            title="Tags"
             selected={newFood.tags}
             onAddItem={_onAddTagNewFood}
             onCreateItem={_onCreateTag}
@@ -368,7 +516,7 @@ function add(props) {
 
           {type === 'restaurant' && <MiniSearchbox
             list={props.tags.data}
-            title="Thẻ tag"
+            title="Tags"
             selected={newRestaurant.tags}
             onAddItem={_onAddTagNewRestaurant}
             onCreateItem={_onCreateTag}
@@ -392,7 +540,7 @@ function add(props) {
                   newFood.tags.length === 0 ||
                   newFood.restaurant_name === ''
                 }
-                content="Thêm"
+                content="Add"
                 colors={[
                   colors.home1,
                   colors.home2,
@@ -414,7 +562,7 @@ function add(props) {
                   newRestaurant.phone_number === '' ||
                   newRestaurant.website === ''
                 }
-                content="Thêm"
+                content="Add"
                 colors={[
                   colors.home1,
                   colors.home2,

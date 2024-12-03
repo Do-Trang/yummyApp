@@ -5,7 +5,7 @@ const foodCardStyles = StyleSheet.create({
   detailView: {
     flex: 1,
     backgroundColor: colors.white,
-    // padding: 16,
+    padding: 10,
   },
   content: {
     flexDirection: 'column',

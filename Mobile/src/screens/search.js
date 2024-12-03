@@ -54,9 +54,7 @@ function SearchScreen(props) {
 
   return (
     <View style={[GlobalStyle.content]}>
-      <CustomButton
-        icon_name={type === 'food' ? 'hamburger' : 'store'}
-        style={styles.typeIcon}
+      <CustomButton icon_name={type === 'food' ? 'hamburger' : 'store'} style={styles.typeIcon}
         onPress={() => {
           if (type === 'food') {
             setType('retaurant');
@@ -69,32 +67,20 @@ function SearchScreen(props) {
       />
 
       <View style={[GlobalStyle.TitleBoxHeader]}>
-        <Text style={GlobalStyle.Title}>Tìm kiếm</Text>
+        <Text style={GlobalStyle.Title}>Search</Text>
       </View>
 
       {showTag && (
-        <TagDialog
-          open={showTag}
-          onCancel={() => setShowTag(false)}
-          setNewFood={item => setFilter(item)}
-          newFood={filter}
-        />
+        <TagDialog open={showTag} onCancel={() => setShowTag(false)} setNewFood={item => setFilter(item)} newFood={filter}/>
       )}
       {showIngredient && type === 'food' && (
-        <IngredientDialog
-          open={showIngredient}
-          onCancel={() => setShowIngredient(false)}
-          setNewFood={item => setFilter(item)}
-          newFood={filter}
-        />
+        <IngredientDialog open={showIngredient} onCancel={() => setShowIngredient(false)} setNewFood={item => setFilter(item)} newFood={filter}/>
       )}
 
       <SafeAreaView style={styles.favBox}>
         <View style={{width: '100%'}}>
           <TouchableOpacity onPress={() => setShowTag(true)}>
-            <Text
-              style={[GlobalStyle.CustomFont, styles.halfNhalf]}
-              numberOfLines={1}>
+            <Text style={[GlobalStyle.CustomFont, styles.halfNhalf]} numberOfLines={1}>
               Thẻ tags: {filter.tags.map(item => item.title).join(', ')}
             </Text>
           </TouchableOpacity>
@@ -107,32 +93,22 @@ function SearchScreen(props) {
             </TouchableOpacity>
           )}
         </View>
-        {type === 'food' ? (
+
+        {/* {type === 'food' ? (
           <FlatList
-            data={foodData}
-            // fix VirtualizedList: You have a large list that is slow to update
-            initialNumToRender={4}
+            data={foodData} initialNumToRender={4}
             renderItem={item => {
-              return (
-                <SmallFoodCard food={item.item} navigation={props.navigation} />
-              );
+              return (<SmallFoodCard food={item.item} navigation={props.navigation} />);
             }}
             keyExtractor={item => item.id}
           />
         ) : (
-          <FlatList
-            data={restaurantData}
-            initialNumToRender={4}
+          <FlatList data={restaurantData} initialNumToRender={4}
             renderItem={item => {
-              return (
-                <SmallRestaurantCard
-                  restaurant={item.item}
-                  navigation={props.navigation}
-                />
-              );
+              return (<SmallRestaurantCard restaurant={item.item} navigation={props.navigation}/>);
             }}
           />
-        )}
+        )} */}
         <View style={{height: 64, width: 1}}></View>
       </SafeAreaView>
     </View>
