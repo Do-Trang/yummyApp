@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>   
+    <title>Simple Audio Recorder</title>
+    <style>
+        body {
+            font-family: sans-serif;
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .container {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+        button {
+            padding: 10px 15px;
+            font-size: 16px;
+            cursor: pointer;
+        }
+        .status {
+            font-weight: bold;
+            margin-top: 10px;
+        }
+        .transcript {
+            margin-top: 20px;
+            border: 1px solid #ccc;
+            padding: 15px;
+            white-space: pre-wrap;
+        }
+    </style>
+</head>
+<body>
+    <h1>Ghi âm và chuyển âm thanh thành văn bản</h1>
+    <div class="container">
+        <button id="recordBtn">Bắt đầu ghi âm</button>
+        <button id="stopBtn" disabled>Dừng ghi âm</button>
+        <p class="status" id="statusText">Trạng thái: Chưa ghi âm</p>
+        <button id="sendBtn" disabled>Gửi đến server</button>
+        <div id="transcript" class="transcript"></div>
+    </div>
+
+    <script>
+        let recorder, chunks = [];
+        let recordedBlob = null;
+
+        const recordBtn = document.getElementById('recordBtn');
+        const stopBtn = document.getElementById('stopBtn');
+        const sendBtn = document.getElementById('sendBtn');
+        const statusText = document.getElementById('statusText');
+        const transcriptDiv = document.getElementById('transcript');
+
+        recordBtn.addEventListener('click', async () => {
+            chunks = [];
+            transcriptDiv.textContent = "";
+            sendBtn.disabled = true;
+            recordedBlob = null;
+
+            statusText.textContent = "Trạng thái: Đang xin quyền truy cập micro...";
+            const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+            statusText.textContent = "Trạng thái: Đang ghi âm...";
+            recorder = new MediaRecorder(stream);
+
+            recorder.ondataavailable = e => chunks.push(e.data);
+            recorder.onstop = e => {
+                // Khi dừng recorder
+                const completeBlob = new Blob(chunks, { type: 'audio/webm; codecs=opus' });
+                recordedBlob = completeBlob;
+                statusText.textContent = "Trạng thái: Đã ghi âm xong, sẵn sàng gửi";
+                sendBtn.disabled = false;
+            };
+
+            recorder.start();
+            recordBtn.disabled = true;
+            stopBtn.disabled = false;
+        });
+
+        stopBtn.addEventListener('click', () => {
+            if (recorder && recorder.state !== "inactive") {
+                recorder.stop();
+                stopBtn.disabled = true;
+                recordBtn.disabled = false;
+            }
+        });
+
+        sendBtn.addEventListener('click', () => {
+            if (!recordedBlob) {
+                statusText.textContent = "Không có dữ liệu âm thanh để gửi.";
+                return;
+            }
+
+            statusText.textContent = "Trạng thái: Đang gửi dữ liệu lên server...";
+
+            // Đọc blob thành Base64
+            const reader = new FileReader();
+            reader.readAsDataURL(recordedBlob);
+            reader.onloadend = function() {
+                const base64data = reader.result;
+                // Loại bỏ prefix: "data:audio/webm;codecs=opus;base64,"
+                const base64String = base64data.replace(/^data:(.*;base64,)?/, '');
+
+                fetch("http://localhost:5000/transcribe", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify({
+                        audio: base64String
+                    })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.response) {
+                        statusText.textContent = "Trạng thái: Thành công!";
+                        transcriptDiv.textContent = "Kết quả chuyển đổi:\n" + data.response;
+                    } else {
+                        statusText.textContent = "Trạng thái: Lỗi từ server!";
+                        transcriptDiv.textContent = "Đã xảy ra lỗi hoặc không có phản hồi hợp lệ.";
+                    }
+                })
+                .catch(error => {
+                    statusText.textContent = "Trạng thái: Gửi dữ liệu thất bại!";
+                    transcriptDiv.textContent = "Đã xảy ra lỗi: " + error;
+                });
+            };
+        });
+    </script>
+</body>
+</html>

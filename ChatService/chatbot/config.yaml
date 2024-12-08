@@ -1,0 +1,10 @@
+openai:
+  api_key: $OPENAI_API_KEY
+  model_transcript: "whisper-1"
+  model_transcript_language: "vi"
+
+
+
+
+
+

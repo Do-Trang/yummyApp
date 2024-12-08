@@ -287,7 +287,7 @@ class ChatBot:
         )
         chat = model.start_chat(enable_automatic_function_calling=True,history=[])
         response = chat.send_message(prompt)
-        open("response.txt","w").write(response.text)
+        open("response.txt","w",encoding="utf-8").write(response.text)
         return response.text
 def remove_newlines(value):
     if isinstance(value, str):
@@ -299,14 +299,14 @@ def remove_newlines(value):
     return value
 
 def change_json_format():
-    with open("abc.json","r") as file:
+    with open("abc.json","r",encoding="utf-8") as file:
         jsonData = json.load(file)
         jsonData = remove_newlines(jsonData)
-    with open("filed.json","r") as file:
+    with open("filed.json","r",encoding="utf-8") as file:
         myField = json.load(file)
         myField = remove_newlines(myField)
 
-    with open("mydata.txt","w") as file:
+    with open("mydata.txt","w",encoding="utf-8") as file:
         for i in range(len(jsonData)):
             restaurant_name = f"{myField["restaurant_name"]} là {jsonData[i]["restaurant_name"]}"
             restaurant_address = f"{myField["restaurant_address"]} là {jsonData[i]["restaurant_address"]}"
@@ -338,15 +338,17 @@ def create_database(connection_string):
     with conn.cursor() as cur:
         cur.execute("CREATE DATABASE vector_db")
         cur.execute("CREATE DATABASE session_db")
+        cur.execute("CREATE EXTENSION vector")
 def drop_database(connection_string):
     conn= psycopg2.connect(connection_string)
     conn.autocommit = True
     with conn.cursor() as cur:
         cur.execute("DROP DATABASE IF EXISTS vector_db")
         cur.execute("DROP DATABASE IF EXISTS session_db")
+        cur.execute("DROP EXTENSION IF EXISTS vector CASCADE")
 
 
-connection_string = "postgresql://postgres:1@localhost:5432"
+connection_string = "postgresql://postgres:123456@localhost:5430"
 drop_database(connection_string)
 create_database(connection_string)
 sessionDB = SessionDB(f"{connection_string}/session_db")

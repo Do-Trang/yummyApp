@@ -2,9 +2,9 @@
 Chuyển file .env.example --> .env
 Lấy key từ google theo đường link trong file.
 - Tạo môi trường venv: 
-** python -m venv my_venv **
-- Nếu dùng Ubuntu: source ./my_venv/bin/activate
-- Nếu dùng windows: .\my_venv\Scripts\activate
+** python -m venv venv **
+- Nếu dùng Ubuntu: source ./venv/bin/activate
+- Nếu dùng windows: .\venv\Scripts\activate
 - gõ lệnh:
 pip install -r requirements.txt
 - sau đó gõ thêm lệnh :< mặc kệ cảnh báo đỏ nhé>
@@ -12,7 +12,8 @@ pip install google-generativeai==0.8.3
 pip install grpcio-tools==1.68.0
 
 pip install flask flask-cors grpcio grpcio-tools
-pip install --upgrade protobuf
+
+[//]: # (pip install --upgrade protobuf)
 
 # Bước 2:
 Chuyển đường dẫn command line đến file ai_service.proto
