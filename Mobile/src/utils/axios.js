@@ -2,7 +2,7 @@ import axios from 'axios'
 // import { IP, PORT } from '@env'
 import AsyncStorage from '@react-native-async-storage/async-storage'
 
-const IP = "192.168.3.9";
+const IP = "192.168.0.131";
 const PORT = "3000";
 export { IP, PORT };
 

@@ -10,13 +10,6 @@ import BigRestaurantCard from '../components/cards/restaurant-cards/BigRestauran
 import colors from '../constants/colors';
 import client from '../utils/axios';
 
-
-import {
- addFoodToFavorite,
- addRestaurantToFavorite,
- addFoodToBlacklist,
- addRestaurantToBlacklist,
-} from '../redux/actions';
 const randomGen = (number) => Math.floor(Math.random() * number);
 
 function Home() {
