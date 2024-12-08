@@ -1,69 +1,31 @@
 from flask import Flask, request, jsonify
 from flask_cors import CORS
 import grpc
-import ai_service_pb2
-import ai_service_pb2_grpc
-
+from ai_service import AIServicer
+from audio.audio_handler import AudioTranscriptRequest, AudioHandler
+from audio.whisper import whisper
 app = Flask(__name__)
 CORS(app)
-
-# gRPC Client
-class AIClient:
-    def __init__(self, host='localhost', port=50052):
-        self.channel = grpc.insecure_channel(f'{host}:{port}')
-        try:
-            # Try to initiate the connection
-            grpc.channel_ready_future(self.channel).result(timeout=10)
-            print(f"Connected to AI service at {host}:{port}")
-        except grpc.FutureTimeoutError:
-            print(f"Failed to connect to AI service at {host}:{port}")
-            raise Exception(f"Failed to connect to AI service at {host}:{port}")
-        self.stub = ai_service_pb2_grpc.AIServiceStub(self.channel)
-
-    def first_chat(self, user_id, question):
-        try:
-            request = ai_service_pb2.FirstChatRequest(user_id=user_id, question=question)
-            response = self.stub.FirstChat(request)
-            return response.response
-        except grpc.RpcError as e:
-            print(f"RPC failed: {e.code()}, {e.details()}")
-            return None
-
-    def get_chat(self, user_id, session_id, question):
-        try:
-            request = ai_service_pb2.GetChatRequest(user_id=user_id, session_id=session_id, question=question)
-            response = self.stub.GetChat(request)
-            return response.response
-        except grpc.RpcError as e:
-            print(f"RPC failed: {e.code()}, {e.details()}")
-            return None
-
+import tempfile
+from pathlib import Path
+from envyaml import EnvYAML
+import os
+import openai
+import dotenv
+_current_dir = os.path.dirname(__file__)
+dotenv.load_dotenv(os.path.join(_current_dir, ".env"))
+CONFIG = EnvYAML(os.path.join(_current_dir, "config.yaml"))
+client = openai.OpenAI(api_key=CONFIG["openai"]["api_key"])
+audio = AudioHandler()
 # Initialize gRPC client
-grpc_client = AIClient()
+grpc_client = AIServicer()
 
-@app.route('/first-chat', methods=['POST'])
-# def first_chat():
-#     data = request.json
-#     user_id = data.get('user_id')
-#     question = data.get('question')
-
-#     if not user_id or not question:
-#         return jsonify({"error": "user_id and question are required"}), 400
-
-#     response = grpc_client.first_chat(user_id, question)
-
-#     if response is None:
-#         return jsonify({"error": "Failed to initialize chat session"}), 500
-
-#     return jsonify({"response": response})
-
-# @app.route('/first-chat', methods=['POST'])
 @app.route('/first-chat', methods=['POST'])
 def first_chat():
     data = request.json
     if not data:
         return jsonify({"error": "Request body must be JSON"}), 400
-    
+
     user_id = data.get('user_id')
     question = data.get('question')
 
@@ -71,12 +33,13 @@ def first_chat():
         return jsonify({"error": "user_id and question are required"}), 400
 
     # Attempt to call the gRPC service
+
     try:
         response = grpc_client.first_chat(user_id, question)
 
         if response is None:
             return jsonify({"error": "Failed to initialize chat session with the AI service"}), 500
-        
+
         return jsonify({"response": response})
 
     except grpc.RpcError as e:
@@ -107,5 +70,30 @@ def chat():
 
     return jsonify({"response": response})
 
+
+from flask import request
+
+@app.route('/transcribe', methods=['POST'])
+async def generate_transcription():
+    data = request.get_json()
+    # data["audio"] chứa chuỗi base64 (theo ví dụ phía trước)
+    audio_base64 = data.get("audio", None)
+    if not audio_base64:
+        return {"error": "No audio data provided"}, 400
+    
+    audio_handler = audio
+    # Extracts the audio segment of the file
+    audio_segment, _ = audio_handler.extract_audio_segment(audio_base64)
+
+    # Send it as a tempfile path to openai - because that's the acceptable way to do it
+    with tempfile.NamedTemporaryFile(suffix=".mp3", delete=True) as tmp_file:
+        audio_segment.export(tmp_file.name, format="mp3")
+        speech_filepath = Path(tmp_file.name)
+        transcripted_response = await whisper(audio_file=open(speech_filepath, "rb"), CONFIG=CONFIG, client=client)
+
+    return {"response": transcripted_response}
+
+
 if __name__ == "__main__":
+
     app.run(host='0.0.0.0', port=5000)
