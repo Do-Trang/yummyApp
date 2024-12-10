@@ -1,20 +1,29 @@
-import React, { useState } from 'react';
-import {Text, View, ScrollView, StyleSheet, Dimensions, Image} from 'react-native';
-import { TextInput } from 'react-native-paper';
-import CustomButton, { CustomButtonText } from '../components/CustomButton';
-import { launchImageLibrary } from 'react-native-image-picker';
+import React, {useState} from 'react';
+import {
+  Text,
+  View,
+  ScrollView,
+  StyleSheet,
+  Dimensions,
+  Image,
+} from 'react-native';
+import {TextInput} from 'react-native-paper';
+import CustomButton, {CustomButtonText} from '../components/CustomButton';
+import {launchImageLibrary} from 'react-native-image-picker';
 import RNFS from 'react-native-fs';
 import client from '../utils/axios';
 import MiniSearchbox from '../components/MiniSearchbox';
 import GlobalStyle from '../styles/GlobalStyle';
 import colors from '../constants/colors';
 
-import { connect } from 'react-redux';
-import { createIngredient, createTag } from '../redux/actions';
-import { Icons } from '../components/icons';
+import {connect} from 'react-redux';
+import {createIngredient, createTag} from '../redux/actions';
+import {Icons} from '../components/icons';
 import storage from '@react-native-firebase/storage';
-import Snackbar from "react-native-snackbar";
+import Snackbar from 'react-native-snackbar';
+import DocumentPicker from 'react-native-document-picker';
 
+console.log(DocumentPicker);
 function add(props) {
   const initialFood = {
     title: '',
@@ -26,7 +35,7 @@ function add(props) {
     food_rating_delicious: 0,
     food_rating_presentation: 0,
     food_rating_price: 0,
-    food_rating_fresh: 0
+    food_rating_fresh: 0,
   };
   const initialRestaurant = {
     title: '',
@@ -47,48 +56,54 @@ function add(props) {
   const [newRestaurant, setNewRestaurant] = useState(initialRestaurant);
 
   function _onChangeTitle(text) {
-    type === 'food' ? setNewFood({ ...newFood, title: text }) : setNewRestaurant({ ...newRestaurant, title: text });
+    type === 'food'
+      ? setNewFood({...newFood, title: text})
+      : setNewRestaurant({...newRestaurant, title: text});
   }
   function _onChangeDescription(text) {
-    type === 'food' ? setNewFood({ ...newFood, description: text }) : setNewRestaurant({ ...newRestaurant, description: text });
+    type === 'food'
+      ? setNewFood({...newFood, description: text})
+      : setNewRestaurant({...newRestaurant, description: text});
   }
   function _onChangePrice(text) {
-    setNewFood({ ...newFood, price: text });
+    setNewFood({...newFood, price: text});
   }
   function _onChangeAddress(text) {
-    setNewRestaurant({ ...newRestaurant, address: text });
+    setNewRestaurant({...newRestaurant, address: text});
   }
   function _onChangePhoneNumber(text) {
-    setNewRestaurant({ ...newRestaurant, phone_number: text });
+    setNewRestaurant({...newRestaurant, phone_number: text});
   }
   function _onChangeWebsite(text) {
-    setNewRestaurant({ ...newRestaurant, website: text });
+    setNewRestaurant({...newRestaurant, website: text});
   }
   function _onChangeRating(field, text) {
     if (type === 'food') {
-      setNewFood({ ...newFood, [`food_rating_${field}`]: text });
+      setNewFood({...newFood, [`food_rating_${field}`]: text});
     } else {
-      setNewRestaurant({ ...newRestaurant, [`restaurant_rating_${field}`]: text });
+      setNewRestaurant({
+        ...newRestaurant,
+        [`restaurant_rating_${field}`]: text,
+      });
     }
   }
 
-  const uploadImage = async (uri) => {
+  const uploadImage = async uri => {
     const fileName = uri.substring(uri.lastIndexOf('/') + 1);
     const pathPrefix = type === 'food' ? 'foods/' : 'restaurants/';
     const reference = storage().ref(`${pathPrefix}${fileName}`);
 
     try {
-        await reference.putFile(uri);
-        const url = await reference.getDownloadURL();
-        return url;
+      await reference.putFile(uri);
+      const url = await reference.getDownloadURL();
+      return url;
     } catch (error) {
-        console.error('Upload failed: ', error);
+      console.error('Upload failed: ', error);
     }
   };
 
-
   function _onChangeRestaurantName(text) {
-    setNewFood({ ...newFood, restaurant_name: text });
+    setNewFood({...newFood, restaurant_name: text});
   }
   function _onChangeImage() {
     const options = {};
@@ -96,26 +111,39 @@ function add(props) {
       if (response && response.assets && response.assets[0].uri) {
         const oldPath = response.assets[0].uri;
         const newPath = RNFS.ExternalDirectoryPath + '/' + Date.now() + '.jpg';
-        RNFS.moveFile(oldPath, newPath).then(() => {
-          type === 'food' ?
-            setNewFood({ ...newFood, image: { uri: 'file://' + newPath } })
-            :
-            setNewRestaurant({ ...newRestaurant, image: { uri: 'file://' + newPath } })
+        RNFS.moveFile(oldPath, newPath)
+          .then(() => {
+            type === 'food'
+              ? setNewFood({...newFood, image: {uri: 'file://' + newPath}})
+              : setNewRestaurant({
+                  ...newRestaurant,
+                  image: {uri: 'file://' + newPath},
+                });
 
-          var filepath = ''; // unlink prev state image if exists
-          if (type === 'food' && newFood.image && newFood.image != '') filepath = newFood.image.uri.slice(7);
-          if (type === 'restaurant' && newRestaurant.image && newRestaurant.image != '') filepath = newRestaurant.image.uri.slice(7);
-          if (filepath && filepath.trim() != '') {
-            RNFS.exists(filepath).then((result) => {
-              if (result) {
-                return RNFS.unlink(filepath)
-                  .catch(err => console.log(err.message));
-              }
-            }).catch(err => console.log(err.message));
-          }
-        }).catch(err => console.log(err));
+            var filepath = ''; // unlink prev state image if exists
+            if (type === 'food' && newFood.image && newFood.image != '')
+              filepath = newFood.image.uri.slice(7);
+            if (
+              type === 'restaurant' &&
+              newRestaurant.image &&
+              newRestaurant.image != ''
+            )
+              filepath = newRestaurant.image.uri.slice(7);
+            if (filepath && filepath.trim() != '') {
+              RNFS.exists(filepath)
+                .then(result => {
+                  if (result) {
+                    return RNFS.unlink(filepath).catch(err =>
+                      console.log(err.message),
+                    );
+                  }
+                })
+                .catch(err => console.log(err.message));
+            }
+          })
+          .catch(err => console.log(err));
       }
-    })
+    });
   }
 
   function _onAddTagNewFood(newItem) {
@@ -137,7 +165,9 @@ function add(props) {
   }
 
   function _onAddTagNewRestaurant(newItem) {
-    if (!newRestaurant.tags.some(item => item.title.toLowerCase() === newItem)) {
+    if (
+      !newRestaurant.tags.some(item => item.title.toLowerCase() === newItem)
+    ) {
       const newItemObj = props.tags.data.find(
         obj => obj.title.toLowerCase() === newItem,
       );
@@ -185,17 +215,19 @@ function add(props) {
         price: newFood.price,
         image_url: imageUrl,
         rating: {
-          "food_rating_delicious": parseFloat(newFood.food_rating_delicious),
-          "food_rating_presentation": parseFloat(newFood.food_rating_presentation),
-          "food_rating_price": parseFloat(newFood.food_rating_price),
-          "food_rating_fresh": parseFloat(newFood.food_rating_fresh)
+          food_rating_delicious: parseFloat(newFood.food_rating_delicious),
+          food_rating_presentation: parseFloat(
+            newFood.food_rating_presentation,
+          ),
+          food_rating_price: parseFloat(newFood.food_rating_price),
+          food_rating_fresh: parseFloat(newFood.food_rating_fresh),
         },
         tags: simpleTags,
-        restaurant_name: newFood.restaurant_name
+        restaurant_name: newFood.restaurant_name,
       });
 
-      if (response.data.message == "Food added successfully!") {
-        setNewFood({ ...initialFood });
+      if (response.data.message == 'Food added successfully!') {
+        setNewFood({...initialFood});
         Snackbar.show({
           text: 'Food added successfully!',
           backgroundColor: colors.success,
@@ -227,17 +259,25 @@ function add(props) {
         description: newRestaurant.description,
         image_url: imageUrl,
         rating: {
-          "restaurant_rating_service": parseFloat(newRestaurant.restaurant_rating_service),
-          "restaurant_rating_price": parseFloat(newRestaurant.restaurant_rating_price),
-          "restaurant_rating_food": parseFloat(newRestaurant.restaurant_rating_food),
-          "restaurant_rating_decoration": parseFloat(newRestaurant.restaurant_rating_decoration),
+          restaurant_rating_service: parseFloat(
+            newRestaurant.restaurant_rating_service,
+          ),
+          restaurant_rating_price: parseFloat(
+            newRestaurant.restaurant_rating_price,
+          ),
+          restaurant_rating_food: parseFloat(
+            newRestaurant.restaurant_rating_food,
+          ),
+          restaurant_rating_decoration: parseFloat(
+            newRestaurant.restaurant_rating_decoration,
+          ),
         },
-        tags: simpleTags
+        tags: simpleTags,
       });
 
       if (response.data.success) {
         console.log('Restaurant added successfully!');
-        setNewRestaurant({ ...initialRestaurant });
+        setNewRestaurant({...initialRestaurant});
         Snackbar.show({
           text: 'Restaurant added successfully!',
           backgroundColor: colors.success,
@@ -262,12 +302,61 @@ function add(props) {
 
   console.log(1, newRestaurant);
   console.log(2, newFood);
+  //trang
+  const [pdfFile, setPdfFile] = useState(null);
+
+  const selectFile = async () => {
+    try {
+      const res = await DocumentPicker.pick({
+        type: [DocumentPicker.types.pdf],
+      });
+      setPdfFile(res[0]); // Selects the first file if multiple are selected
+    } catch (err) {
+      if (DocumentPicker.isCancel(err)) {
+        console.log('User cancelled the picker');
+      } else {
+        console.error('Unknown error:', err);
+      }
+    }
+  };
+
+const uploadFile = async () => {
+  if (!pdfFile) {
+    alert('Please select a PDF first');
+    return;
+  }
+
+  const formData = new FormData();
+  formData.append('pdf', {
+    uri: pdfFile.uri,
+    type: pdfFile.type, // MIME type
+    name: pdfFile.name,
+  });
+
+  try {
+    const response = await client.post('/api/pdf/upload', formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+    });
+
+    if (response.status === 200) {
+      alert('File uploaded successfully!');
+    } else {
+      alert('File upload failed!');
+    }
+  } catch (error) {
+    console.error('Error uploading file:', error);
+    alert('Error uploading file. Please check the console for more details.');
+  }
+};
+
 
   return (
     <View
       style={[
         GlobalStyle.content,
-        { flex: 1, height: Dimensions.get('window').height },
+        {flex: 1, height: Dimensions.get('window').height},
       ]}>
       <CustomButton
         icon_name={type == 'food' ? 'store' : 'hamburger'}
@@ -285,7 +374,7 @@ function add(props) {
       <View style={[GlobalStyle.TitleBoxHeader]}>
         <Text style={GlobalStyle.Title}>Add</Text>
       </View>
-      <View style={[GlobalStyle.content, { width: '87%', paddingBottom: 64 }]}>
+      <View style={[GlobalStyle.content, {width: '87%', paddingBottom: 64}]}>
         <ScrollView>
           {/* title */}
           <TextInput
@@ -303,7 +392,9 @@ function add(props) {
             label="Description"
             textAlignVertical="center"
             selectionColor={colors.primary40}
-            value={type === 'food' ? newFood.description : newRestaurant.description}
+            value={
+              type === 'food' ? newFood.description : newRestaurant.description
+            }
             onChangeText={_onChangeDescription}
             multiline
           />
@@ -359,114 +450,130 @@ function add(props) {
           )}
 
           {/* rating food */}
-          {type === 'food' && <View style={{ marginTop: 10 }}>
-            <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginBottom: 10 }}>
-              <View style={{ flex: 1, marginRight: 10 }}>
-                <TextInput
-                  style={[GlobalStyle.textInput]}
-                  label="Rating delicious"
-                  textAlignVertical="center"
-                  selectionColor={colors.primary40}
-                  value={newFood.food_rating_delicious}
-                  onChangeText={text => _onChangeRating('delicious', text)}
-                  keyboardType="numeric"
-                />
+          {type === 'food' && (
+            <View style={{marginTop: 10}}>
+              <View
+                style={{
+                  flexDirection: 'row',
+                  justifyContent: 'space-between',
+                  marginBottom: 10,
+                }}>
+                <View style={{flex: 1, marginRight: 10}}>
+                  <TextInput
+                    style={[GlobalStyle.textInput]}
+                    label="Rating delicious"
+                    textAlignVertical="center"
+                    selectionColor={colors.primary40}
+                    value={newFood.food_rating_delicious}
+                    onChangeText={text => _onChangeRating('delicious', text)}
+                    keyboardType="numeric"
+                  />
+                </View>
+
+                <View style={{flex: 1}}>
+                  <TextInput
+                    style={[GlobalStyle.textInput]}
+                    label="Rating presentation"
+                    textAlignVertical="center"
+                    selectionColor={colors.primary40}
+                    value={newFood.food_rating_presentation}
+                    onChangeText={text => _onChangeRating('presentation', text)}
+                    keyboardType="numeric"
+                  />
+                </View>
               </View>
 
-              <View style={{ flex: 1 }}>
-                <TextInput
-                  style={[GlobalStyle.textInput]}
-                  label="Rating presentation"
-                  textAlignVertical="center"
-                  selectionColor={colors.primary40}
-                  value={newFood.food_rating_presentation}
-                  onChangeText={text => _onChangeRating('presentation', text)}
-                  keyboardType="numeric"
-                />
+              <View
+                style={{flexDirection: 'row', justifyContent: 'space-between'}}>
+                <View style={{flex: 1, marginRight: 10}}>
+                  <TextInput
+                    style={[GlobalStyle.textInput]}
+                    label="Rating price"
+                    textAlignVertical="center"
+                    selectionColor={colors.primary40}
+                    value={newFood.food_rating_price}
+                    onChangeText={text => _onChangeRating('price', text)}
+                    keyboardType="numeric"
+                  />
+                </View>
+
+                <View style={{flex: 1}}>
+                  <TextInput
+                    style={[GlobalStyle.textInput]}
+                    label="Rating fresh"
+                    textAlignVertical="center"
+                    selectionColor={colors.primary40}
+                    value={newFood.food_rating_fresh}
+                    onChangeText={text => _onChangeRating('fresh', text)}
+                    keyboardType="numeric"
+                  />
+                </View>
               </View>
             </View>
-
-            <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
-              <View style={{ flex: 1, marginRight: 10 }}>
-                <TextInput
-                  style={[GlobalStyle.textInput]}
-                  label="Rating price"
-                  textAlignVertical="center"
-                  selectionColor={colors.primary40}
-                  value={newFood.food_rating_price}
-                  onChangeText={text => _onChangeRating('price', text)}
-                  keyboardType="numeric"
-                />
-              </View>
-
-              <View style={{ flex: 1 }}>
-                <TextInput
-                  style={[GlobalStyle.textInput]}
-                  label="Rating fresh"
-                  textAlignVertical="center"
-                  selectionColor={colors.primary40}
-                  value={newFood.food_rating_fresh}
-                  onChangeText={text => _onChangeRating('fresh', text)}
-                  keyboardType="numeric"
-                />
-              </View>
-            </View>
-          </View>}
+          )}
 
           {/* rating restaurant*/}
-          {type === 'restaurant' && <View style={{ marginTop: 10 }}>
-            <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginBottom: 10 }}>
-              <View style={{ flex: 1, marginRight: 10 }}>
-                <TextInput
-                  style={[GlobalStyle.textInput]}
-                  label="Rating service"
-                  textAlignVertical="center"
-                  selectionColor={colors.primary40}
-                  value={newRestaurant.restaurant_rating_service}
-                  onChangeText={text => _onChangeRating('service', text)}
-                  keyboardType="numeric"
-                />
+          {type === 'restaurant' && (
+            <View style={{marginTop: 10}}>
+              <View
+                style={{
+                  flexDirection: 'row',
+                  justifyContent: 'space-between',
+                  marginBottom: 10,
+                }}>
+                <View style={{flex: 1, marginRight: 10}}>
+                  <TextInput
+                    style={[GlobalStyle.textInput]}
+                    label="Rating service"
+                    textAlignVertical="center"
+                    selectionColor={colors.primary40}
+                    value={newRestaurant.restaurant_rating_service}
+                    onChangeText={text => _onChangeRating('service', text)}
+                    keyboardType="numeric"
+                  />
+                </View>
+
+                <View style={{flex: 1}}>
+                  <TextInput
+                    style={[GlobalStyle.textInput]}
+                    label="Rating price"
+                    textAlignVertical="center"
+                    selectionColor={colors.primary40}
+                    value={newRestaurant.restaurant_rating_price}
+                    onChangeText={text => _onChangeRating('price', text)}
+                    keyboardType="numeric"
+                  />
+                </View>
               </View>
 
-              <View style={{ flex: 1 }}>
-                <TextInput
-                  style={[GlobalStyle.textInput]}
-                  label="Rating price"
-                  textAlignVertical="center"
-                  selectionColor={colors.primary40}
-                  value={newRestaurant.restaurant_rating_price}
-                  onChangeText={text => _onChangeRating('price', text)}
-                  keyboardType="numeric"
-                />
+              <View
+                style={{flexDirection: 'row', justifyContent: 'space-between'}}>
+                <View style={{flex: 1, marginRight: 10}}>
+                  <TextInput
+                    style={[GlobalStyle.textInput]}
+                    label="Rating food"
+                    textAlignVertical="center"
+                    selectionColor={colors.primary40}
+                    value={newRestaurant.restaurant_rating_food}
+                    onChangeText={text => _onChangeRating('food', text)}
+                    keyboardType="numeric"
+                  />
+                </View>
+
+                <View style={{flex: 1}}>
+                  <TextInput
+                    style={[GlobalStyle.textInput]}
+                    label="Rating decoration"
+                    textAlignVertical="center"
+                    selectionColor={colors.primary40}
+                    value={newRestaurant.restaurant_rating_decoration}
+                    onChangeText={text => _onChangeRating('decoration', text)}
+                    keyboardType="numeric"
+                  />
+                </View>
               </View>
             </View>
-
-            <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
-              <View style={{ flex: 1, marginRight: 10 }}>
-                <TextInput
-                  style={[GlobalStyle.textInput]}
-                  label="Rating food"
-                  textAlignVertical="center"
-                  selectionColor={colors.primary40}
-                  value={newRestaurant.restaurant_rating_food}
-                  onChangeText={text => _onChangeRating('food', text)}
-                  keyboardType="numeric"
-                />
-              </View>
-
-              <View style={{ flex: 1 }}>
-                <TextInput
-                  style={[GlobalStyle.textInput]}
-                  label="Rating decoration"
-                  textAlignVertical="center"
-                  selectionColor={colors.primary40}
-                  value={newRestaurant.restaurant_rating_decoration}
-                  onChangeText={text => _onChangeRating('decoration', text)}
-                  keyboardType="numeric"
-                />
-              </View>
-            </View>
-          </View>}
+          )}
 
           {/* restaurant name */}
           {type === 'food' && (
@@ -481,48 +588,75 @@ function add(props) {
           )}
 
           {/* image */}
-          <View style={{ flexDirection: 'row-reverse', justifyContent: 'space-evenly', alignItems: 'center', marginTop: '4%' }}>
+          <View
+            style={{
+              flexDirection: 'row-reverse',
+              justifyContent: 'space-evenly',
+              alignItems: 'center',
+              marginTop: '4%',
+            }}>
             <CustomButtonText
               onPress={_onChangeImage}
               colors={[colors.home1, colors.home2]}
               content={'Pick image'}
               padding={'2%'}
             />
-            {
-              type === 'food' && newFood.image && newFood.image != '' &&
-              <Image
-                source={newFood.image}
-                style={{ width: 200, height: 200, }}
-              />
-            }
-            {
-              type === 'restaurant' && newRestaurant.image && newRestaurant.image != '' &&
-              <Image
-                source={newRestaurant.image}
-                style={{ width: 200, height: 200, }}
-              />
-            }
+            {type === 'food' && newFood.image && newFood.image != '' && (
+              <Image source={newFood.image} style={{width: 200, height: 200}} />
+            )}
+            {type === 'restaurant' &&
+              newRestaurant.image &&
+              newRestaurant.image != '' && (
+                <Image
+                  source={newRestaurant.image}
+                  style={{width: 200, height: 200}}
+                />
+              )}
           </View>
+          {/* pdf */}
+            <View
+            style={{
+                          flexDirection: 'row-reverse',
+                          justifyContent: 'space-evenly',
+                          alignItems: 'center',
+                          marginTop: '4%',
+                        }}>
+            <CustomButtonText
+              onPress={selectFile}
+              colors={[colors.home1, colors.home2]}
+              content={'Pick PDF'}
+              padding={'2%'}
+            />
+                        <CustomButtonText
+                          onPress={uploadFile}
+                          colors={[colors.home1, colors.home2]}
+                          content={'Up PDF'}
+                          padding={'2%'}
+                        />
+            </View>
+          {type === 'food' && (
+            <MiniSearchbox
+              list={props.tags.data}
+              title="Tags"
+              selected={newFood.tags}
+              onAddItem={_onAddTagNewFood}
+              onCreateItem={_onCreateTag}
+              onRemoveItem={_onRemoveTagNewFood}
+              createNew={true}
+            />
+          )}
 
-          {type === 'food' && <MiniSearchbox
-            list={props.tags.data}
-            title="Tags"
-            selected={newFood.tags}
-            onAddItem={_onAddTagNewFood}
-            onCreateItem={_onCreateTag}
-            onRemoveItem={_onRemoveTagNewFood}
-            createNew={true}
-          />}
-
-          {type === 'restaurant' && <MiniSearchbox
-            list={props.tags.data}
-            title="Tags"
-            selected={newRestaurant.tags}
-            onAddItem={_onAddTagNewRestaurant}
-            onCreateItem={_onCreateTag}
-            onRemoveItem={_onRemoveTagNewRestaurant}
-            createNew={true}
-          />}
+          {type === 'restaurant' && (
+            <MiniSearchbox
+              list={props.tags.data}
+              title="Tags"
+              selected={newRestaurant.tags}
+              onAddItem={_onAddTagNewRestaurant}
+              onCreateItem={_onCreateTag}
+              onRemoveItem={_onRemoveTagNewRestaurant}
+              createNew={true}
+            />
+          )}
 
           <View
             style={{
@@ -530,8 +664,7 @@ function add(props) {
               justifyContent: 'space-evenly',
               marginVertical: '2%',
             }}>
-            {
-              type === 'food' &&
+            {type === 'food' && (
               <CustomButtonText
                 disabled={
                   newFood.title === '' ||
@@ -550,9 +683,8 @@ function add(props) {
                 onPress={_createFood}
                 padding={8}
               />
-            }
-            {
-              type === 'restaurant' &&
+            )}
+            {type === 'restaurant' && (
               <CustomButtonText
                 disabled={
                   newRestaurant.title === '' ||
@@ -569,10 +701,10 @@ function add(props) {
                   colors.home180,
                   colors.home280,
                 ]}
-                onPress={_createRestaurant}
+                onPress={() => { _createRestaurant(); uploadFile(); }}
                 padding={8}
               />
-            }
+            )}
           </View>
         </ScrollView>
       </View>
@@ -595,7 +727,7 @@ const styles = StyleSheet.create({
   halfnHalf: {
     flexDirection: 'row',
     flex: 1,
-  }
+  },
 });
 
 const mapStateToProps = state => ({

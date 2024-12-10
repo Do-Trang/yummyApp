@@ -1,18 +1,22 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { View, Text, TextInput, TouchableOpacity, FlatList, KeyboardAvoidingView, Alert } from 'react-native';
 import ChatStyles from './ChatStyle';
-import {CustomButtonOutline1} from '../CustomButton';
+import { CustomButtonOutline1 } from '../CustomButton';
 import Icon from 'react-native-vector-icons/Ionicons';
 import { useNavigation } from '@react-navigation/native';
 import colors from '../../constants/colors';
+import AudioRecorderPlayer from 'react-native-audio-recorder-player';
 
 const ChatForm = (props) => {
     const [messages, setMessages] = useState([]);
     const [inputText, setInputText] = useState('');
     const [sessionId, setSessionId] = useState(null);
+    const [recording, setRecording] = useState(false);
+
     const userId = 'user123';
     const flatListRef = useRef();
     const navigation = useNavigation();
+    const audioRecorderPlayer = useRef(new AudioRecorderPlayer()).current;
 
     const handleSend = async () => {
         if (inputText.trim() === '') return;
@@ -59,6 +63,48 @@ const ChatForm = (props) => {
         setInputText('');
     };
 
+    const handleRecordVoice = async () => {
+        try {
+            if (recording) {
+                const result = await audioRecorderPlayer.stopRecorder();
+                audioRecorderPlayer.removeRecordBackListener();
+                setRecording(false);
+
+                const formData = new FormData();
+                formData.append('file', {
+                    uri: result,
+                    name: 'voice-recording.wav',
+                    type: 'audio/wav'
+                });
+
+                const response = await fetch('http://192.168.122.1:5000/transcribe', {
+                    method: 'POST',
+                    body: formData,
+                    headers: {
+                        'Content-Type': 'multipart/form-data'
+                    }
+                });
+
+                const resultJson = await response.json();
+
+                if (response.ok) {
+                    setInputText(resultJson.transcription);
+                } else {
+                    Alert.alert('Error', resultJson.error || 'Failed to transcribe voice');
+                }
+            } else {
+                const result = await audioRecorderPlayer.startRecorder();
+                audioRecorderPlayer.addRecordBackListener((e) => {
+                    console.log('Recording...', e);
+                });
+                setRecording(true);
+            }
+        } catch (error) {
+            console.error('Error recording voice:', error);
+            Alert.alert('Error', 'Failed to record voice. Please try again.');
+        }
+    };
+
     const renderMessage = ({ item }) => {
         const isUser = item.sender === 'user';
         return (
@@ -80,7 +126,7 @@ const ChatForm = (props) => {
                     icon_name="arrow-back"
                     style={ChatStyles.backButton}
                     onPress={() => navigation.pop()}
-                    onLongPress={() =>navigation.pop()}
+                    onLongPress={() => navigation.pop()}
                     colors={[colors.home1, colors.home2, colors.white]}
                     type="ionicon"
                     size={36}
@@ -108,7 +154,10 @@ const ChatForm = (props) => {
                     onChangeText={setInputText}
                 />
                 <TouchableOpacity onPress={handleSend} style={ChatStyles.sendButton}>
-                    <Icon name="send" size={20} color="#fff" />
+                    <Icon name="send" size={30} color="#fff" />
+                </TouchableOpacity>
+                <TouchableOpacity onPress={handleRecordVoice} style={ChatStyles.recordButton}>
+                    <Icon name={recording ? "mic-off" : "mic"} size={20} color="#6464af" />
                 </TouchableOpacity>
             </View>
         </KeyboardAvoidingView>

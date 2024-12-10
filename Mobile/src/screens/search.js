@@ -1,56 +1,40 @@
 import React, {useState, useEffect} from 'react';
-import {
-  View,
-  FlatList,
-  SafeAreaView,
-  StyleSheet,
-  Text,
-  TouchableOpacity,
-} from 'react-native';
-import {connect} from 'react-redux';
+import {View, FlatList, SafeAreaView, StyleSheet, Text, TouchableOpacity,} from 'react-native';
 import {SmallFoodCard} from '../components/cards/food-cards/SmallFoodCard';
+import FoodSearchBar from '../components/searchbar/FoodSearchBar';
 
 import GlobalStyle from '../styles/GlobalStyle';
 import CustomButton from '../components/CustomButton';
 import colors from '../constants/colors';
 import {Icons} from '../components/icons';
-import {IngredientDialog, TagDialog} from '../components/CustomDialog';
-import {SmallRestaurantCard} from '../components/RestaurantCard';
+import {SmallRestaurantCard} from '../components/cards/restaurant-cards/SmallRestaurantCard';
+import RestaurantSearchBar from '../components/searchbar/RestaurantSearchBar';
+import client from "../utils/axios";
 
-function SearchScreen(props) {
-  const [foodData, setFoodData] = useState(props.foods.data); // render flatlist
-  const [restaurantData, setRestaurantData] = useState(props.restaurants.data);
-  const [type, setType] = useState(true); // food || restaurant
-  const [showTag, setShowTag] = useState(false); // tag dialog
-  const [showIngredient, setShowIngredient] = useState(false); // ingredient dialog
-
-  const [filter, setFilter] = useState({
-    ingredients: [],
-    tags: [],
-  });
+export default function SearchScreen() {
+  const [foodData, setFoodData] = useState([]);
+  const [restaurantData, setRestaurantData] = useState([]);
+  const [type, setType] = useState(true);
 
   useEffect(() => {
-    const newFoodData = props.foods.data.filter(food => {
-      const hasAllTags = filter.tags.every(tag =>
-        food.tags.find(item => tag.id === item),
-      );
-      const hasAllIngredients = filter.ingredients.every(ingredient =>
-        food.ingredients.find(item => ingredient.id === item),
-      );
-      return (
-        (filter.tags.length === 0 || hasAllTags) &&
-        (filter.ingredients.length === 0 || hasAllIngredients)
-      );
-    });
-    const newRestaurantData = props.restaurants.data.filter(food => {
-      const hasAllTags = filter.tags.every(tag =>
-        food.tags.find(item => tag.id === item),
-      );
-      return filter.tags.length === 0 || hasAllTags;
-    });
-    setFoodData(newFoodData);
-    setRestaurantData(newRestaurantData);
-  }, [filter]);
+    const fetchData = async () => {
+      setIsLoading(true);
+      try {
+        if (type) {
+          const response = await client.get('/foods');
+          setFoodData(response.data.food);
+        } else {
+          const response = await client.get('/restaurants');
+          setRestaurantData(response.data.restaurants);
+        }
+      } catch (error) {
+        console.error("Error fetching data:", error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    fetchData();
+  }, [type]);
 
   return (
     <View style={[GlobalStyle.content]}>
@@ -66,49 +50,62 @@ function SearchScreen(props) {
         type={Icons.FontAwesome5}
       />
 
-      <View style={[GlobalStyle.TitleBoxHeader]}>
-        <Text style={GlobalStyle.Title}>Search</Text>
-      </View>
+      {type === 'food' ? (
+        <FoodSearchBar
+          onSearch={query => {
 
-      {showTag && (
-        <TagDialog open={showTag} onCancel={() => setShowTag(false)} setNewFood={item => setFilter(item)} newFood={filter}/>
-      )}
-      {showIngredient && type === 'food' && (
-        <IngredientDialog open={showIngredient} onCancel={() => setShowIngredient(false)} setNewFood={item => setFilter(item)} newFood={filter}/>
+          }}
+        />
+      ) : (
+        <RestaurantSearchBar
+          onSearch={query => {
+
+          }}
+        />
       )}
 
       <SafeAreaView style={styles.favBox}>
-        <View style={{width: '100%'}}>
-          <TouchableOpacity onPress={() => setShowTag(true)}>
-            <Text style={[GlobalStyle.CustomFont, styles.halfNhalf]} numberOfLines={1}>
-              Thẻ tags: {filter.tags.map(item => item.title).join(', ')}
-            </Text>
-          </TouchableOpacity>
-          {type === 'food' && (
-            <TouchableOpacity onPress={() => setShowIngredient(true)}>
-              <Text style={[GlobalStyle.CustomFont, styles.halfNhalf]}>
-                Nguyên liệu:{' '}
-                {filter.ingredients.map(item => item.title).join(', ')}
-              </Text>
-            </TouchableOpacity>
-          )}
-        </View>
-
-        {/* {type === 'food' ? (
+        {type === 'food' ? (
           <FlatList
             data={foodData} initialNumToRender={4}
             renderItem={item => {
-              return (<SmallFoodCard food={item.item} navigation={props.navigation} />);
+              return (
+                <SmallFoodCard
+                  name={item.name}
+                  tags={item.tags}
+                  image_url={item.image_url}
+                  description={item.description}
+                  price={item.price}
+                  food_id={item.food_id}
+                  rating={item.rating}
+                  restaurantName={item.restaurantName}
+                  restaurantAddress={item.restaurantAddress}
+                />
+              );
             }}
             keyExtractor={item => item.id}
           />
         ) : (
-          <FlatList data={restaurantData} initialNumToRender={4}
+          <FlatList
+            data={restaurantData} initialNumToRender={4}
             renderItem={item => {
-              return (<SmallRestaurantCard restaurant={item.item} navigation={props.navigation}/>);
+              return (
+                <SmallRestaurantCard
+                  restaurant_id={item.id}
+                  name={item.name}
+                  address={item.address}
+                  phone_number={item.phone_number}
+                  website={item.website}
+                  description={item.description}
+                  image_url={item.image_url}
+                  rating={item.rating}
+                  tags={item.tags}
+                />
+              );
             }}
+            keyExtractor={item => item.id}
           />
-        )} */}
+        )}
         <View style={{height: 64, width: 1}}></View>
       </SafeAreaView>
     </View>
@@ -141,12 +138,3 @@ const styles = StyleSheet.create({
     paddingVertical: '1%',
   },
 });
-
-const mapStateToProps = state => ({
-  ingredients: state.ingredients,
-  tags: state.tags,
-  foods: state.filteredFoods,
-  restaurants: state.restaurants,
-});
-
-export default connect(mapStateToProps, {})(SearchScreen);
