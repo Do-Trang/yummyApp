@@ -18,7 +18,6 @@ function PersonalDetail({ modalPosition, onClose, modalVisible, personalDetails 
   const [imageHeight, setImageHeight] = useState(200);
   const [scale, setScale] = useState(new Animated.Value(1));
   const pinchRef = React.useRef();
-  console.log(personalDetails, "hi");
   const [isFollowing, setIsFollowing] = useState(personalDetails.user.followStatus === 'follow');
 
   const onImageLoad = (event) => {
@@ -28,17 +27,31 @@ function PersonalDetail({ modalPosition, onClose, modalVisible, personalDetails 
   };
 
   const handleFollowButton = () => {
-    const apiEndpoint = isFollowing ? `relations/unfollow/${personalDetails.user.user_id}` : `relations/deleteFollow/${personalDetails.user.user_id}`;
-    
-    client.delete(apiEndpoint)
-      .then((response) => {
-        console.log(response.data.message);
-        setIsFollowing(!isFollowing);
-      })
-      .catch((error) => {
-        console.error('Error updating follow status:', error);
-      });
+    const apiEndpoint = isFollowing 
+      ? `relations/unfollow/${personalDetails.user.user_id}` 
+      : `relations/follow/${personalDetails.user.user_id}`;
+  
+    if (isFollowing) {
+      client.delete(apiEndpoint)
+        .then((response) => {
+          console.log(response.data.message);
+          setIsFollowing(false);
+        })
+        .catch((error) => {
+          console.error('Error updating follow status:', error.response?.data || error.message);
+        });
+    } else {
+      client.post(apiEndpoint)
+        .then((response) => {
+          console.log(response.data.message);
+          setIsFollowing(true);
+        })
+        .catch((error) => {
+          console.error('Error updating follow status:', error.response?.data || error.message);
+        });
+    }
   };
+  
 
   return (
     <View style={styles.container}>
@@ -46,9 +59,7 @@ function PersonalDetail({ modalPosition, onClose, modalVisible, personalDetails 
         <ScrollView contentContainerStyle={styles.scrollContent}>
           <TouchableWithoutFeedback onPress={onClose}>
             <View style={styles.modalOverlay}>
-              <Animated.View
-                style={[styles.modalContent, { transform: [{ translateY: modalPosition }], }]}
-              >
+              <Animated.View style={styles.modalContent}> 
                 <View style={styles.profileHeader}>
                   <ImageBackground 
                       source={{ uri: personalDetails.user.avatar_url }}
@@ -64,7 +75,6 @@ function PersonalDetail({ modalPosition, onClose, modalVisible, personalDetails 
                     <Image source={{ uri: personalDetails.user.avatar_url }} style={styles.avatar} resizeMode="cover" />
                   </View>
                   
-                  {/* Container for the username and follow/unfollow button */}
                   <View style={styles.nameAndButtonContainer}>
                     <Text style={styles.name}>{personalDetails.user.username}</Text>
                     <TouchableOpacity
@@ -72,7 +82,7 @@ function PersonalDetail({ modalPosition, onClose, modalVisible, personalDetails 
                       onPress={handleFollowButton}
                     >
                       <Text style={styles.followButtonText}>
-                        {isFollowing ? 'Unfollow' : 'Follow'}
+                        {isFollowing ? `Unfollow` : `Follow`}
                       </Text>
                     </TouchableOpacity>
                   </View>

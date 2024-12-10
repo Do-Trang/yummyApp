@@ -6,7 +6,7 @@ const styles = StyleSheet.create({
     alignItems: 'flex-start',
     flexGrow: 1,
     backgroundColor: '#f5f5f5',
-    paddingBottom: 50,
+    paddingTop: 50,
   },
   profileHeader: {
     alignItems: 'center',

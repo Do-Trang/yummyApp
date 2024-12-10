@@ -44,10 +44,10 @@ const SearchBar = ({ onSearch }) => {
     const parsedMaxPrice = parseFloat(maxPrice);
 
     // Kiểm tra nếu giá trị minPrice và maxPrice là hợp lệ
-    if (isNaN(parsedMinPrice) || isNaN(parsedMaxPrice)) {
-      alert("Please enter valid prices.");
-      return;
-    }
+    // if (isNaN(parsedMinPrice) || isNaN(parsedMaxPrice)) {
+    //   alert("Please enter valid prices.");
+    //   return;
+    // }
 
     onSearch(name, parsedMinPrice, parsedMaxPrice, tags, {
       food_rating_delicious: minRating.food_rating_delicious,

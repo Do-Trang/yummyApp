@@ -78,11 +78,9 @@ const LoginForm = (props) => {
     useEffect(() => {
         const login = () => {
             if (!isSubmitting) return;
-            console.log(IP, PORT)
 
             client.post(`/auth/login`, { account, password })
                 .then((response) => {
-                    console.log(response)
                     const data = response.data;
                     if (response.status === 200 && data.success) {
                         Snackbar.show({
@@ -103,6 +101,7 @@ const LoginForm = (props) => {
 
                         AsyncStorage.setItem('accessToken', data.accessToken);
                         AsyncStorage.setItem('refreshToken', data.refreshToken);
+                        AsyncStorage.setItem('id', data.id.toString());
                         props.navigation.navigate("AnimTab1");
                     } else {
                         props.navigation.navigate("VerifyScreen", { account: account });
