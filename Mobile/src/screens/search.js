@@ -1,47 +1,70 @@
 import React, {useState, useEffect} from 'react';
-import {View, FlatList, SafeAreaView, StyleSheet, Text, TouchableOpacity,} from 'react-native';
-import {SmallFoodCard} from '../components/cards/food-cards/SmallFoodCard';
+import {View, FlatList, SafeAreaView, StyleSheet, Text, TouchableOpacity} from 'react-native';
+import SmallFoodCard from '../components/cards/food-cards/SmallFoodCard';
 import FoodSearchBar from '../components/searchbar/FoodSearchBar';
 
 import GlobalStyle from '../styles/GlobalStyle';
 import CustomButton from '../components/CustomButton';
 import colors from '../constants/colors';
 import {Icons} from '../components/icons';
-import {SmallRestaurantCard} from '../components/cards/restaurant-cards/SmallRestaurantCard';
+import SmallRestaurantCard from '../components/cards/restaurant-cards/SmallRestaurantCard';
 import RestaurantSearchBar from '../components/searchbar/RestaurantSearchBar';
 import client from "../utils/axios";
 
 export default function SearchScreen() {
   const [foodData, setFoodData] = useState([]);
   const [restaurantData, setRestaurantData] = useState([]);
-  const [type, setType] = useState(true);
+  const [type, setType] = useState('food');
+  const [showSearchBar, setShowSearchBar] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [filteredFoodData, setFilteredFoodData] = useState([]);
+  const [filteredRestaurantData, setFilteredRestaurantData] = useState([]);
 
   useEffect(() => {
     const fetchData = async () => {
-      setIsLoading(true);
       try {
-        if (type) {
+        if (type === 'food') {
           const response = await client.get('/foods');
           setFoodData(response.data.food);
+          setFilteredFoodData(response.data.food); // Set food data initially
         } else {
           const response = await client.get('/restaurants');
           setRestaurantData(response.data.restaurants);
+          setFilteredRestaurantData(response.data.restaurants); // Set restaurant data initially
         }
       } catch (error) {
         console.error("Error fetching data:", error);
-      } finally {
-        setIsLoading(false);
       }
     };
     fetchData();
   }, [type]);
 
+  // Handle search for food items
+  const handleFoodSearch = (query) => {
+    setSearchQuery(query);
+    setFilteredFoodData(foodData.filter(item => 
+      item.name.toLowerCase().includes(query.toLowerCase()) || 
+      item.description.toLowerCase().includes(query.toLowerCase())
+    ));
+  };
+
+  // Handle search for restaurant items
+  const handleRestaurantSearch = (query) => {
+    setSearchQuery(query);
+    setFilteredRestaurantData(restaurantData.filter(item => 
+      item.name.toLowerCase().includes(query.toLowerCase()) || 
+      item.description.toLowerCase().includes(query.toLowerCase())
+    ));
+  };
+
   return (
     <View style={[GlobalStyle.content]}>
-      <CustomButton icon_name={type === 'food' ? 'hamburger' : 'store'} style={styles.typeIcon}
+      <CustomButton 
+        icon_name={type === 'food' ? 'hamburger' : 'store'} 
+        style={styles.typeIcon}
         onPress={() => {
           if (type === 'food') {
-            setType('retaurant');
+            setType('restaurant');
           } else {
             setType('food');
           }
@@ -50,25 +73,27 @@ export default function SearchScreen() {
         type={Icons.FontAwesome5}
       />
 
-      {type === 'food' ? (
-        <FoodSearchBar
-          onSearch={query => {
+      <CustomButton
+        icon_name="search"
+        style={styles.searchIcon}
+        onPress={() => setShowSearchBar(!showSearchBar)}
+        colors={[colors.home1, colors.home2, colors.white]}
+        type={Icons.FontAwesome5}
+      />
 
-          }}
-        />
+      {/* Display search bar if active */}
+      {showSearchBar && (type === 'food' ? (
+        <FoodSearchBar onSearch={handleFoodSearch} />
       ) : (
-        <RestaurantSearchBar
-          onSearch={query => {
-
-          }}
-        />
-      )}
+        <RestaurantSearchBar onSearch={handleRestaurantSearch} />
+      ))}
 
       <SafeAreaView style={styles.favBox}>
         {type === 'food' ? (
           <FlatList
-            data={foodData} initialNumToRender={4}
-            renderItem={item => {
+            data={filteredFoodData} // Use filtered data
+            initialNumToRender={4}
+            renderItem={({item}) => {
               return (
                 <SmallFoodCard
                   name={item.name}
@@ -83,17 +108,17 @@ export default function SearchScreen() {
                 />
               );
             }}
-            keyExtractor={item => item.id}
           />
         ) : (
-          <FlatList
-            data={restaurantData} initialNumToRender={4}
-            renderItem={item => {
+          <FlatList 
+            data={filteredRestaurantData} // Use filtered data
+            initialNumToRender={4}
+            renderItem={({item}) => {
               return (
                 <SmallRestaurantCard
-                  restaurant_id={item.id}
-                  name={item.name}
-                  address={item.address}
+                  restaurant_id={item.id} 
+                  name={item.name} 
+                  address={item.address} 
                   phone_number={item.phone_number}
                   website={item.website}
                   description={item.description}
@@ -103,7 +128,6 @@ export default function SearchScreen() {
                 />
               );
             }}
-            keyExtractor={item => item.id}
           />
         )}
         <View style={{height: 64, width: 1}}></View>
@@ -129,12 +153,11 @@ const styles = StyleSheet.create({
     zIndex: 1,
     elevation: 10,
   },
-  halfNhalf: {
-    width: '100%',
-    borderColor: colors.primary,
-    borderBottomWidth: 1,
-    fontSize: 16,
-    marginVertical: '2%',
-    paddingVertical: '1%',
+  searchIcon: {
+    position: 'absolute',
+    top: 18,
+    right: 18,
+    zIndex: 1, 
+    borderRadius: 25,
   },
 });

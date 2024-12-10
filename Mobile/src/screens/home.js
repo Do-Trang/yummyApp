@@ -27,18 +27,17 @@ function Home() {
     }
   }, [type]);
 
-  useEffect(() => {
-    console.log('Foods:', foods);
-    console.log('Restaurants:', restaurants);
-    console.log('Current Food:', currentFood);
-    console.log('Current Restaurant:', currentRestaurant);
-  }, [foods, restaurants, currentFood, currentRestaurant]);
+  // useEffect(() => {
+  //   console.log('Foods:', foods);
+  //   console.log('Restaurants:', restaurants);
+  //   console.log('Current Food:', currentFood);
+  //   console.log('Current Restaurant:', currentRestaurant);
+  // }, [foods, restaurants, currentFood, currentRestaurant]);
 
   // Fetch food data
   const fetchFoods = async () => {
     try {
       const response = await client.get('/foods');
-      console.log('Fetched Foods:', response.data);
       if (response.data && response.data.food) {
         setFoods(response.data.food);
         setCurrentFood(response.data.food[randomGen(response.data.food.length)]);
