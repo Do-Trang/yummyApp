@@ -80,6 +80,7 @@ const login = async (account, password, isEmail) => {
         },
         attributes: ['user_id', 'password'],
     });
+    id = user.user_id;
 
     if (!user) {
         return { success: false, message: 'Non-exist user.' };
@@ -131,7 +132,8 @@ const login = async (account, password, isEmail) => {
                 success: true,
                 message: 'Login successful.',
                 accessToken,
-                refreshToken
+                refreshToken,
+                id
             };
         }
     } else {
@@ -145,7 +147,8 @@ const login = async (account, password, isEmail) => {
             success: true,
             message: 'Login successful.',
             accessToken,
-            refreshToken
+            refreshToken,
+            id
         };
     }
 };

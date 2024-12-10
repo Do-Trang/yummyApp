@@ -1,5 +1,5 @@
-import React from 'react';
-import { Text, View, Image, Dimensions } from 'react-native';
+import React, { useState, useRef } from 'react';
+import { Text, View, Image, Dimensions, Animated } from 'react-native';
 import GlobalStyle from '../../../styles/GlobalStyle';
 import styles from './RestaurantCardStyles';
 import RestaurantDetail from "../../modals/restaurant-modal/RestaurantModal";

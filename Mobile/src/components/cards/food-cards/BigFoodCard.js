@@ -1,20 +1,39 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { Text, View, Image, Dimensions, Animated } from 'react-native';
 import GlobalStyle from '../../../styles/GlobalStyle';
 import styles from './FoodCardStyles';
 import FoodDetail from "../../modals/food-modal/FoodModal";
 import UserDetail from "../../modals/user-modal/UserModal";
 import client from "../../../utils/axios";
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { useNavigation } from '@react-navigation/native';
 
 const { width: windowWidth, height: windowHeight } = Dimensions.get('window');
 
-function BigFoodCard({username, user_id, name, tags, image_url, description, price, food_id, rating, restaurantName, restaurantAddress,}) {
+function BigFoodCard({ username, user_id, name, tags, image_url, description, price, food_id, rating, restaurantName, restaurantAddress,}) {
   const [isModalVisible, setModalVisible] = useState(false);
   const modalPosition = useRef(new Animated.Value(windowHeight)).current;
   const [personalDetails, setPersonalDetails] = useState(null);
   const [isUserModalVisible, setUserModalVisible] = useState(false);
+  const [currentUserId, setCurrentUserId] = useState(null);
+  const navigation = useNavigation();
 
-  const fetchUserDetails = (userId) => {
+  useEffect(() => {
+    const fetchCurrentUserId = async () => {
+      try {
+        const userId = await AsyncStorage.getItem('id');
+        if (userId) {
+          setCurrentUserId(userId);
+        }
+      } catch (error) {
+        console.error('Error fetching user ID from AsyncStorage:', error);
+      }
+    };
+
+    fetchCurrentUserId();
+  }, []);
+
+  const fetchUserDetailsForModal = (userId) => {
     client
       .get(`/profile/${userId}`)
       .then((response) => {
@@ -22,7 +41,19 @@ function BigFoodCard({username, user_id, name, tags, image_url, description, pri
         setUserModalVisible(true);
       })
       .catch((error) => {
-        console.error('Error fetching user details:', error);
+        console.error('Error fetching user details for modal:', error);
+      });
+  };
+
+  const fetchUserDetailsForNavigation = (userId) => {
+    client
+      .get(`/profile/${userId}`)
+      .then((response) => {
+        setPersonalDetails(response.data);
+        navigation.navigate('Menu');
+      })
+      .catch((error) => {
+        console.error('Error fetching user details for navigation:', error);
       });
   };
 
@@ -47,6 +78,15 @@ function BigFoodCard({username, user_id, name, tags, image_url, description, pri
     setUserModalVisible(false);
   };
 
+  const handleUsernamePress = () => {
+    console.log(currentUserId);
+    if (user_id == currentUserId) {
+      fetchUserDetailsForNavigation(user_id);
+    } else {
+      fetchUserDetailsForModal(user_id);
+    }
+  };
+
   return (
     <View style={styles.detailView}>
       <Image style={{ width: windowWidth - 10, height: windowWidth - 10 }} source={{ uri: image_url }} />
@@ -57,7 +97,7 @@ function BigFoodCard({username, user_id, name, tags, image_url, description, pri
         <Text style={GlobalStyle.Subtitle}>{tags.join('・')}</Text>
       </View>
       <View style={styles.usernameBox}>
-        <Text style={styles.username} onPress={() => fetchUserDetails(user_id)}>
+        <Text style={styles.username} onPress={handleUsernamePress}>
           Uploaded by: {username}
         </Text>
       </View>
