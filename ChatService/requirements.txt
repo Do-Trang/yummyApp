@@ -3,6 +3,5 @@ llama-index-vector-stores-postgres==0.2.6
 llama-index-llms-gemini==0.3.7
 llama-index-embeddings-gemini==0.2.2
 python-dotenv==1.0.1
-grpcio==1.68.0
 envyaml==1.10.211231
 pydub==0.25.1

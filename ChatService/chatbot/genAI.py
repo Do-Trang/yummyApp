@@ -215,6 +215,7 @@ class EmbeddingDB:
                 "hnsw_dist_method": "vector_cosine_ops",
             },
         )
+        
         index = VectorStoreIndex.from_vector_store(vector_store=hybrid_vector_store)
         return index
 
@@ -244,6 +245,7 @@ class ChatBot:
         search_results= ""
         query = question
         retrieved_nodes = hybrid_query_engine.retrieve(query)
+
         i = 0
         for node in retrieved_nodes:
             i += 1
@@ -319,7 +321,7 @@ def change_json_format():
             restaurant_tags = f"{myField["restaurant_tags"]} là {jsonData[i]["restaurant_tags"]}"
             food_name = f"{myField["food_name"]} là {jsonData[i]["food_name"]}"
             food_description = f"{myField["food_description"]} là {jsonData[i]["food_description"]}"
-            food_price = f"{myField["food_price"]} là {jsonData[i]["food_price"]}"
+            food_price = f"{myField["food_price"]} là {jsonData[i]["food_price"]} nghìn VNĐ"
             food_rating_delicious = f"{myField["food_rating_delicious"]} là {jsonData[i]["food_rating_delicious"]}"
             food_rating_presentation = f"{myField["food_rating_presentation"]} là {jsonData[i]["food_rating_presentation"]}"
             food_rating_price = f"{myField["food_rating_price"]} là {jsonData[i]["food_rating_price"]}"
@@ -347,8 +349,9 @@ def drop_database(connection_string):
         cur.execute("DROP DATABASE IF EXISTS session_db")
         cur.execute("DROP EXTENSION IF EXISTS vector CASCADE")
 
-
-connection_string = "postgresql://postgres:123456@localhost:5430"
+PORT = os.getenv("PORT")
+PASSWORD = os.getenv("PASSWORD")
+connection_string = f"postgresql://postgres:{PASSWORD}@localhost:{PORT}"
 drop_database(connection_string)
 create_database(connection_string)
 sessionDB = SessionDB(f"{connection_string}/session_db")

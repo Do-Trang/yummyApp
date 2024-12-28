@@ -1,6 +1,5 @@
 from flask import Flask, request, jsonify
 from flask_cors import CORS
-import grpc
 from ai_service import AIServicer
 from audio.audio_handler import AudioTranscriptRequest, AudioHandler
 from audio.whisper import whisper
@@ -18,7 +17,7 @@ CONFIG = EnvYAML(os.path.join(_current_dir, "config.yaml"))
 client = openai.OpenAI(api_key=CONFIG["openai"]["api_key"])
 audio = AudioHandler()
 # Initialize gRPC client
-grpc_client = AIServicer()
+ai_service = AIServicer()
 
 @app.route('/first-chat', methods=['POST'])
 def first_chat():
@@ -35,17 +34,12 @@ def first_chat():
     # Attempt to call the gRPC service
 
     try:
-        response = grpc_client.first_chat(user_id, question)
+        response = ai_service.first_chat(user_id, question)
 
         if response is None:
             return jsonify({"error": "Failed to initialize chat session with the AI service"}), 500
 
         return jsonify({"response": response})
-
-    except grpc.RpcError as e:
-        print(f"RPC failed: {e.code()} - {e.details()}")
-        return jsonify({"error": f"gRPC error occurred: {e.details()}"}), 500
-
     except Exception as e:
         print(f"An unexpected error occurred: {str(e)}")
         return jsonify({"error": "An unexpected error occurred. Please try again later."}), 500
@@ -63,7 +57,7 @@ def chat():
     if not user_id or not session_id or not question:
         return jsonify({"error": "user_id, session_id, and question are required"}), 400
 
-    response = grpc_client.get_chat(user_id, session_id, question)
+    response = ai_service.get_chat(user_id, session_id, question)
 
     if response is None:
         return jsonify({"error": "Failed to get response from chatbot"}), 500

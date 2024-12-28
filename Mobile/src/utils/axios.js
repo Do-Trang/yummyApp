@@ -2,10 +2,9 @@ import axios from 'axios'
 // import { IP, PORT } from '@env'
 import AsyncStorage from '@react-native-async-storage/async-storage'
 
-const IP = "192.168.100.134";
+const IP = "172.20.10.10";
 const PORT = "3000";
 export { IP, PORT };
-
 const api = axios.create({
     baseURL: `http://${IP}:${PORT}/`,
     headers: {
