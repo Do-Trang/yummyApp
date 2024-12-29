@@ -13,7 +13,7 @@ Lấy key từ google theo đường link trong file.
 
 pip install flask flask-cors grpcio grpcio-tools
 pip install --upgrade protobuf
-pip install 'flask[async]'
+pip install flask[async]
 
 # Bước 2:
 Chỉnh file .env.example --> .env
