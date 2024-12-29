@@ -4,7 +4,7 @@
 module.exports = {
   async up (queryInterface, Sequelize) {
     /**
-     * Add seed commands here.
+     * Add seed commands here. 123456789Tp@
     */
     await queryInterface.bulkInsert('users', [
       {

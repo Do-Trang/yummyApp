@@ -215,6 +215,7 @@ class EmbeddingDB:
                 "hnsw_dist_method": "vector_cosine_ops",
             },
         )
+        
         index = VectorStoreIndex.from_vector_store(vector_store=hybrid_vector_store)
         return index
 
@@ -244,6 +245,7 @@ class ChatBot:
         search_results= ""
         query = question
         retrieved_nodes = hybrid_query_engine.retrieve(query)
+
         i = 0
         for node in retrieved_nodes:
             i += 1
@@ -308,6 +310,7 @@ def change_json_format():
 
     with open("mydata.txt","w",encoding="utf-8") as file:
         for i in range(len(jsonData)):
+<<<<<<< HEAD
             restaurant_name = f"{myField['restaurant_name']} là {jsonData[i]['restaurant_name']}"
             restaurant_address = f"{myField['restaurant_address']} là {jsonData[i]['restaurant_address']}"
             phone_number = f"{myField['phone_number']} là {jsonData[i]['phone_number']}"
@@ -325,6 +328,25 @@ def change_json_format():
             food_rating_price = f"{myField['food_rating_price']} là {jsonData[i]['food_rating_price']}"
             food_rating_fresh = f"{myField['food_rating_fresh']} là {jsonData[i]['food_rating_fresh']}"
             food_tags = f"{myField['food_tags']} là {jsonData[i]['food_tags']}"
+=======
+            restaurant_name = f"{myField["restaurant_name"]} là {jsonData[i]["restaurant_name"]}"
+            restaurant_address = f"{myField["restaurant_address"]} là {jsonData[i]["restaurant_address"]}"
+            phone_number = f"{myField["phone_number"]} là {jsonData[i]["phone_number"]}"
+            restaurant_description = f"{myField["restaurant_description"]} là {jsonData[i]["restaurant_description"]}"
+            restaurant_rating_service = f"{myField["restaurant_rating_service"]} là {jsonData[i]["restaurant_rating_service"]}"
+            restaurant_rating_price = f"{myField["restaurant_rating_price"]} là {jsonData[i]["restaurant_rating_price"]}"
+            restaurant_rating_food = f"{myField["restaurant_rating_food"]} là {jsonData[i]["restaurant_rating_food"]}"
+            restaurant_rating_decoration = f"{myField["restaurant_rating_decoration"]} là {jsonData[i]["restaurant_rating_decoration"]}"
+            restaurant_tags = f"{myField["restaurant_tags"]} là {jsonData[i]["restaurant_tags"]}"
+            food_name = f"{myField["food_name"]} là {jsonData[i]["food_name"]}"
+            food_description = f"{myField["food_description"]} là {jsonData[i]["food_description"]}"
+            food_price = f"{myField["food_price"]} là {jsonData[i]["food_price"]} nghìn VNĐ"
+            food_rating_delicious = f"{myField["food_rating_delicious"]} là {jsonData[i]["food_rating_delicious"]}"
+            food_rating_presentation = f"{myField["food_rating_presentation"]} là {jsonData[i]["food_rating_presentation"]}"
+            food_rating_price = f"{myField["food_rating_price"]} là {jsonData[i]["food_rating_price"]}"
+            food_rating_fresh = f"{myField["food_rating_fresh"]} là {jsonData[i]["food_rating_fresh"]}"
+            food_tags = f"{myField["food_tags"]} là {jsonData[i]["food_tags"]}"
+>>>>>>> 3a051b0763a9ea5d72d9986ab3995f50eba47bae
             combined = f"{restaurant_name} có {restaurant_address} và {phone_number} và {restaurant_description} và {restaurant_rating_service} và {restaurant_rating_price} và {restaurant_rating_food} và {restaurant_rating_decoration} và {restaurant_tags} và {food_name} có {food_description} và {food_price} và {food_rating_delicious} và {food_rating_presentation} và {food_rating_price} và {food_rating_fresh} và {food_tags}.\n\n"
             # Tạo danh sách các Document (kế thừa từ BaseNode)
             node =  Document(text=combined)
@@ -347,8 +369,14 @@ def drop_database(connection_string):
         cur.execute("DROP DATABASE IF EXISTS session_db")
         cur.execute("DROP EXTENSION IF EXISTS vector CASCADE")
 
+<<<<<<< HEAD
 
 connection_string = "postgresql://postgres:123456789tp.@localhost:5432"
+=======
+PORT = os.getenv("PORT")
+PASSWORD = os.getenv("PASSWORD")
+connection_string = f"postgresql://postgres:{PASSWORD}@localhost:{PORT}"
+>>>>>>> 3a051b0763a9ea5d72d9986ab3995f50eba47bae
 drop_database(connection_string)
 create_database(connection_string)
 sessionDB = SessionDB(f"{connection_string}/session_db")
