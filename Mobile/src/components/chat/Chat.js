@@ -22,13 +22,19 @@ const ChatForm = (props) => {
 
     // Thiết lập một số option cho TTS
     useEffect(() => {
-        // Thay đổi ngôn ngữ theo nhu cầu, ví dụ "vi-VN" hoặc "en-US"
-        Tts.setDefaultLanguage('vi-VN');
-        // Tốc độ đọc, giá trị mặc định khoảng 0.5 -> 0.7
-        Tts.setDefaultRate(0.5);
-        // Cao độ (pitch), giá trị mặc định: 1.0
-        Tts.setDefaultPitch(1.0);
-    }, []);
+        Tts.getInitStatus().then(() => {
+          // Sau khi TTS sẵn sàng, ta mới set language
+          Tts.setDefaultLanguage('vi-VN');
+          Tts.setDefaultRate(0.5);
+          Tts.setDefaultPitch(1.0);
+        }).catch((err) => {
+          if (err.code === 'no_engine') {
+            // Nếu thiết bị chưa cài engine TTS hoặc ngôn ngữ
+            Tts.requestInstallEngine();
+          }
+        });
+      }, []);
+      
 
     // Hàm gửi tin nhắn
     const handleSend = async () => {
@@ -38,14 +44,14 @@ const ChatForm = (props) => {
         setMessages((prevMessages) => [...prevMessages, userMessage]);
 
         try {
-            let endpoint = 'http://172.20.10.10:5000/chat';
+            let endpoint = 'http://192.168.131.111:5000/chat';
             let body = {
                 user_id: userId,
                 question: inputText
             };
 
             if (!sessionId) {
-                endpoint = 'http://172.20.10.10:5000/first-chat';
+                endpoint = 'http://192.168.131.111:5000/first-chat';
             } else {
                 body.session_id = sessionId;
             }
@@ -92,7 +98,7 @@ const ChatForm = (props) => {
                     type: 'audio/wav'
                 });
 
-                const response = await fetch('http://192.168.122.1:5000/transcribe', {
+                const response = await fetch('http://192.168.131.111:5000/transcribe', {
                     method: 'POST',
                     body: formData,
                     headers: {
